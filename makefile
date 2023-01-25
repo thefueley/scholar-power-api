@@ -3,6 +3,14 @@ VERSION := 1.0
 # ==============================================================================
 all: load push
 
+azure:
+	docker build \
+		-f docker/dockerfile.scholar-power-api.basic \
+		-t thefueley/scholar-power-api:$(VERSION) \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+		. --push
+
 load:
 	docker buildx build --load \
 		-f docker/dockerfile.scholar-power-api.basic \
