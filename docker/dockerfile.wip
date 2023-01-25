@@ -1,0 +1,31 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.19 as builder
+ENV CGO_ENABLED 1
+ARG BUILD_REF
+
+
+COPY . /service
+
+# Build the scholar power api binary
+WORKDIR /service/cmd/server
+RUN go build -o api -ldflags "-X main.build=${BUILD_REF}"
+
+FROM alpine:latest
+ARG BUILD_DATE
+ARG BUILD_REF
+RUN apk add --no-cache git make build-base
+RUN addgroup -g 1000 -S api && \
+    adduser -u 1000 -h /api -G api -S api
+
+COPY --from=builder --chown=api:api /service/cmd/server/api /scholar-power/
+ENV PATH="/scholar-power:${PATH}"
+WORKDIR /scholar-power
+USER api
+CMD [./api]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.title="scholar-power-api" \
+      org.opencontainers.image.authors="Chris Rivera <crivera>, Zach Shafer <>, Jessie Park <>" \
+      org.opencontainers.image.source="https://github.com/thefueley/scholar-power-api" \
+      org.opencontainers.image.revision="${BUILD_REF}" \
+      org.opencontainers.image.vendor="SEISMOS"

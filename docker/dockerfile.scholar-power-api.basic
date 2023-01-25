@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.19 AS builder
+ENV CGO_ENABLED 1
+ARG BUILD_REF
+ARG BUILD_DATE
+
+RUN mkdir /service
+ADD . /service
+WORKDIR /service
+
+RUN go build -o api -ldflags "-X main.build=${BUILD_REF}" cmd/server/main.go
+
+FROM ubuntu:latest
+COPY --from=builder /service .
+EXPOSE 3000/tcp
+
+CMD ["./api"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.title="scholar-power-api" \
+      org.opencontainers.image.authors="Chris Rivera <crivera>, Zach Shafer <>, Jessie Parke <>" \
+      org.opencontainers.image.source="https://github.com/thefueley/scholar-power-api" \
+      org.opencontainers.image.revision="${BUILD_REF}" \
+      org.opencontainers.image.vendor="SEISMOS"
