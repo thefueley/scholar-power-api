@@ -46,7 +46,7 @@ stages:
           docker stop test
           docker rm test
         fi
-        docker run -dt --name test -p 3000:3000 thefueley/scholar-power-api:1.0
+        docker run -dt --name test -p 3000:3000 --env-file=/home/anax/.scholar.env thefueley/scholar-power-api:1.0
     continueOnError: 'false'
 - stage: Prod
   jobs:
