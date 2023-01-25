@@ -9,7 +9,8 @@ azure:
 		-t thefueley/scholar-power-api:$(VERSION) \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-		. --push
+		.
+	docker push thefueley/scholar-power-api:$(VERSION)
 
 load:
 	docker buildx build --load \
