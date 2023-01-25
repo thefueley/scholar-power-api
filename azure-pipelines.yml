@@ -1,5 +1,5 @@
 trigger:
-  - master
+  - notify
 
 stages:
 - stage: Analyze
