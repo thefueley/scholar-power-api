@@ -18,6 +18,10 @@ type UserRow struct {
 
 func (d *Database) CreateUser(ctx context.Context, username, password string) (swoleuser.User, error) {
 	username = strings.ToLower(username)
+	
+	if len(password) < 6 {
+		return swoleuser.User{}, fmt.Errorf("bad password: %w", err)
+	}
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
