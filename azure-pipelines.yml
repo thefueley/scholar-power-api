@@ -60,4 +60,16 @@ stages:
     - script: |
         echo "Running on host: $(Agent.MachineName)"
         echo "kick off deploy job to PROD"
+    - task: ado-discord-webhook@1
+      inputs:
+        channelId: $(ADO-CHAN)
+        webhookKey: $(DISCORD-WEBHOOK-KEY)
+        name: 'ADO'
+        messageType: 'embeds'
+        embeds: |
+          [{
+          "title": "ADO Pipeline Complete",
+          "description": "Scholar-Power-API has been pushed to PROD",
+          "author": {"name": "Azure DevOps"}
+          }]
     continueOnError: 'false'
