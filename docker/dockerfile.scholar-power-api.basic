@@ -12,6 +12,8 @@ RUN go build -o api -ldflags "-X main.build=${BUILD_REF}" cmd/server/main.go
 
 FROM ubuntu:latest
 COPY --from=builder /service .
+ARG SCHOLAR_POWER_API_SIGNING_KEY
+ENV SCHOLAR_POWER_API_SIGNING_KEY=${SCHOLAR_POWER_API_SIGNING_KEY}
 EXPOSE 3000/tcp
 
 CMD ["./api"]
