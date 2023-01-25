@@ -45,7 +45,7 @@ stages:
         echo $PATH
         pwd
         ls -al
-        docker run -it --name test -p 3000:3000 -d thefueley/scholar-power-api:latest
+        docker run -dt --name test -p 3000:3000 thefueley/scholar-power-api:1.0
     continueOnError: 'false'
 - stage: Prod
   jobs:
