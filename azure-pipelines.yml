@@ -61,6 +61,27 @@ stages:
           "author": {"name": "Azure DevOps"}
           }]
     continueOnError: 'false'
+  - job: Discord
+    dependsOn: DockerDeploy
+    pool: WorkoutTracker
+    displayName: Discord
+    workspace:
+      clean: all
+    timeoutInMinutes: "3"
+    steps:
+    - task: ado-discord-webhook@1
+      condition: failed()
+      inputs:
+        channelId: $(ADO-CHAN)
+        webhookKey: $(DISCORD-WEBHOOK-KEY)
+        name: 'ADO'
+        messageType: 'embeds'
+        embeds: |
+          [{
+          "title": "ADO Pipeline Failed",
+          "description": "Push to TEST Failed",
+          "author": {"name": "Azure DevOps"}
+          }]
 - stage: Prod
   jobs:
   - job: PushToProd
@@ -73,6 +94,14 @@ stages:
     - script: |
         echo "Running on host: $(Agent.MachineName)"
         echo "kick off deploy job to PROD"
+  - job: Discord
+    dependsOn: PushToProd
+    pool: WorkoutTracker
+    displayName: Discord
+    workspace:
+      clean: all
+    timeoutInMinutes: "3"
+    steps:
     - task: ado-discord-webhook@1
       condition: succeeded()
       inputs:
