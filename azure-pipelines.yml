@@ -47,20 +47,19 @@ stages:
           docker rm test
         fi
         docker run -dt --name test -p 3000:3000 --env-file=/home/anax/.scholar.env thefueley/scholar-power-api:1.0
-  - job: ado-discord-webhook@1
-    dependsOn: DockerDeploy
-    condition: failed()
-    inputs:
-      channelId: $(ADO-CHAN)
-      webhookKey: $(DISCORD-WEBHOOK-KEY)
-      name: 'ADO'
-      messageType: 'embeds'
-      embeds: |
-        [{
-        "title": "Push to TEST Failed",
-        "description": "Scholar-Power-API has failed to push to TEST",
-        "author": {"name": "Azure DevOps"}
-        }]
+    - task: ado-discord-webhook@1
+      condition: failed()
+      inputs:
+        channelId: $(ADO-CHAN)
+        webhookKey: $(DISCORD-WEBHOOK-KEY)
+        name: 'ADO'
+        messageType: 'embeds'
+        embeds: |
+          [{
+          "title": "Push to TEST Failed",
+          "description": "Scholar-Power-API has failed to push to TEST",
+          "author": {"name": "Azure DevOps"}
+          }]
     continueOnError: 'false'
 - stage: Prod
   jobs:
@@ -74,18 +73,17 @@ stages:
     - script: |
         echo "Running on host: $(Agent.MachineName)"
         echo "kick off deploy job to PROD"
-  - job: ado-discord-webhook@1
-    dependsOn: PushToProd
-    condition: succeeded()
-    inputs:
-      channelId: $(ADO-CHAN)
-      webhookKey: $(DISCORD-WEBHOOK-KEY)
-      name: 'ADO'
-      messageType: 'embeds'
-      embeds: |
-        [{
-        "title": "ADO Pipeline Complete",
-        "description": "All stages have completed successfully",
-        "author": {"name": "Azure DevOps"}
-        }]
+    - task: ado-discord-webhook@1
+      condition: succeeded()
+      inputs:
+        channelId: $(ADO-CHAN)
+        webhookKey: $(DISCORD-WEBHOOK-KEY)
+        name: 'ADO'
+        messageType: 'embeds'
+        embeds: |
+          [{
+          "title": "ADO Pipeline Complete",
+          "description": "All stages have completed successfully",
+          "author": {"name": "Azure DevOps"}
+          }]
     continueOnError: 'false'
