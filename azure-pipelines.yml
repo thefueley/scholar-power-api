@@ -34,35 +34,29 @@ stages:
     continueOnError: 'false'
 - stage: Test
   jobs:
-  - deployment: TEST
+  - job: DockerDeploy
     displayName: Push to TEST
     pool: workout-tracker
     workspace:
       clean: all
     timeoutInMinutes: "3"
-    strategy: 
-      runOnce:
-        deploy:
-          steps:
-          - script: |
-              echo $PATH
-              pwd
-              ls -al
-              docker run -it --name test -p 3000:3000 -d thefueley/scholar-power-api:latest
+    steps:
+    - script: |
+        echo $PATH
+        pwd
+        ls -al
+        docker run -it --name test -p 3000:3000 -d thefueley/scholar-power-api:latest
     continueOnError: 'false'
 - stage: Prod
   jobs:
-  - deployment: PROD
-    pool: 'aarch64'
+  - job: PushToProd
+    pool: workout-tracker
     displayName: Push to PROD
     workspace:
       clean: all
     timeoutInMinutes: "3"
-    strategy: 
-      runOnce:
-        deploy:
-          steps:
-          - script: |
-              echo "Running on host: $(Agent.MachineName)"
-              echo "kick off deploy job to PROD"
+    steps:
+    - script: |
+        echo "Running on host: $(Agent.MachineName)"
+        echo "kick off deploy job to PROD"
     continueOnError: 'false'
