@@ -58,9 +58,6 @@ stages:
     workspace:
       clean: all
     timeoutInMinutes: "3"
-    environment: 
-      name: 'PROD'
-      resourceType: 'VirtualMachine'
     strategy: 
       runOnce:
         deploy:
