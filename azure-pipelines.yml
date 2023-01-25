@@ -42,10 +42,11 @@ stages:
     timeoutInMinutes: "3"
     steps:
     - script: |
-        echo $PATH
-        pwd
-        ls -al
-        docker run -dt --name test -p 3000:3000 thefueley/scholar-power-api:1.0
+        if [ "$(docker ps -aq -f name=test)" ]; then
+          docker stop test
+          docker rm test
+        fi
+        docker run -dt --name test -p 3000:3000 -e SCHOLAR_POWER_API_SIGNING_KEY thefueley/scholar-power-api:1.0
     continueOnError: 'false'
 - stage: Prod
   jobs:
