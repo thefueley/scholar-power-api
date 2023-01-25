@@ -24,3 +24,5 @@ All endpoints that modify the resources will require a valid bearer token.
 ## References
 
 Exercises will be populated from [API Ninjas Exercises API](https://www.api-ninjas.com/api/exercises)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api)
