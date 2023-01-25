@@ -1,0 +1,71 @@
+trigger:
+  - master
+
+stages:
+- stage: Analyze
+  jobs:
+  - job: SonarCloud
+    displayName: "SonarCloud"
+    pool: workout-tracker
+    workspace:
+      clean: all
+    timeoutInMinutes: "10"
+    steps:
+    - script: |
+        sonar-scanner \
+        -Dsonar.organization=phobos \
+        -Dsonar.projectKey=thefueley_scholar-power-api \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=https://sonarcloud.io
+      env:
+        SONAR_TOKEN: $(SONAR_ENV_TOKEN)
+    continueOnError: 'true'
+- stage: Build
+  jobs:
+  - job: DockerBuildPush
+    displayName: Docker Build and Push
+    pool: workout-tracker
+    workspace:
+      clean: all
+    timeoutInMinutes: "10"
+    steps:
+    - script: |
+        make all
+    continueOnError: 'false'
+- stage: Test
+  jobs:
+  - deployment: TEST
+    displayName: Push to TEST
+    pool: workout-tracker
+    workspace:
+      clean: all
+    timeoutInMinutes: "3"
+    strategy: 
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo $PATH
+              pwd
+              ls -al
+              docker run -it --name test -p 3000:3000 -d thefueley/scholar-power-api:latest
+    continueOnError: 'false'
+- stage: Prod
+  jobs:
+  - deployment: PROD
+    pool: 'aarch64'
+    displayName: Push to PROD
+    workspace:
+      clean: all
+    timeoutInMinutes: "3"
+    environment: 
+      name: 'PROD'
+      resourceType: 'VirtualMachine'
+    strategy: 
+      runOnce:
+        deploy:
+          steps:
+          - script: |
+              echo "Running on host: $(Agent.MachineName)"
+              echo "kick off deploy job to PROD"
+    continueOnError: 'false'
