@@ -47,6 +47,20 @@ stages:
           docker rm test
         fi
         docker run -dt --name test -p 3000:3000 --env-file=/home/anax/.scholar.env thefueley/scholar-power-api:1.0
+  - job: ado-discord-webhook@1
+    dependsOn: DockerDeploy
+    condition: failed()
+    inputs:
+      channelId: $(ADO-CHAN)
+      webhookKey: $(DISCORD-WEBHOOK-KEY)
+      name: 'ADO'
+      messageType: 'embeds'
+      embeds: |
+        [{
+        "title": "Push to TEST Failed",
+        "description": "Scholar-Power-API has failed to push to TEST",
+        "author": {"name": "Azure DevOps"}
+        }]
     continueOnError: 'false'
 - stage: Prod
   jobs:
@@ -60,16 +74,18 @@ stages:
     - script: |
         echo "Running on host: $(Agent.MachineName)"
         echo "kick off deploy job to PROD"
-    - task: ado-discord-webhook@1
-      inputs:
-        channelId: $(ADO-CHAN)
-        webhookKey: $(DISCORD-WEBHOOK-KEY)
-        name: 'ADO'
-        messageType: 'embeds'
-        embeds: |
-          [{
-          "title": "ADO Pipeline Complete",
-          "description": "Scholar-Power-API has been pushed to PROD",
-          "author": {"name": "Azure DevOps"}
-          }]
+  - job: ado-discord-webhook@1
+    dependsOn: PushToProd
+    condition: succeeded()
+    inputs:
+      channelId: $(ADO-CHAN)
+      webhookKey: $(DISCORD-WEBHOOK-KEY)
+      name: 'ADO'
+      messageType: 'embeds'
+      embeds: |
+        [{
+        "title": "ADO Pipeline Complete",
+        "description": "All stages have completed successfully",
+        "author": {"name": "Azure DevOps"}
+        }]
     continueOnError: 'false'
