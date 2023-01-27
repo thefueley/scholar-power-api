@@ -42,7 +42,7 @@ func (h *UserHandler) mapRoutes() {
 		fmt.Fprintf(w, "pong")
 	}).Methods("GET")
 
-	h.Router.HandleFunc("/api/v1/user", JWTAuth(h.CreateUser)).Methods("POST")
+	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods("POST")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetByID).Methods("GET")
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetByUserName).Methods("GET")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods("PUT")

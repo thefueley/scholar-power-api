@@ -12,4 +12,6 @@
 *.code-workspace
 
 # DB
-internal/db/*.db
+*.db
+
+*.pem

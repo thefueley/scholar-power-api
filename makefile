@@ -27,7 +27,8 @@ push:
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 		.
-
+key:
+	go run cmd/cli/key/main.go
 # ==============================================================================
 run:
 	go run cmd/server/main.go
