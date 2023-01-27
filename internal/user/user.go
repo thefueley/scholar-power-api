@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"time"
+
+	swt "github.com/thefueley/scholar-power-api/token"
 )
 
 var (
@@ -35,13 +39,33 @@ func NewUserService(store UserStore) *UserService {
 	}
 }
 
-func (us *UserService) CreateUser(ctx context.Context, username, password string) (User, error) {
+func (us *UserService) CreateUser(ctx context.Context, username, password string) (string, error) {
 	usr, err := us.Store.CreateUser(ctx, username, password)
 	if err != nil {
 		fmt.Printf("error creating user '%v' or user already exists\n", username)
-		return User{}, err
+		return usr.ID, err
 	}
-	return usr, nil
+	maker, err := swt.NewJWTMaker(os.Getenv("SCHOLAR_POWER_API_SIGNING_KEY"))
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
+
+	duration := 10 * time.Minute
+
+	token, payload, err := maker.CreateToken(username, duration)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
+
+	fmt.Printf("Token: %v\n", token)
+	fmt.Printf("Payload: %v\n", payload)
+	payload, err = maker.VerifyToken(token)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+	fmt.Printf("Payload: %v\n", payload)
+
+	return token, nil
 }
 
 func (us *UserService) GetByID(ctx context.Context, id string) (User, error) {

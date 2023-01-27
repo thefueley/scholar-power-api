@@ -12,7 +12,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, username string, password string) (swoleuser.User, error)
+	CreateUser(ctx context.Context, username string, password string) (string, error)
 	GetByID(ctx context.Context, uid string) (swoleuser.User, error)
 	GetByUserName(ctx context.Context, username string) (swoleuser.User, error)
 	UpdateUserPassword(ctx context.Context, uid string, password string) error
@@ -25,7 +25,7 @@ type Response struct {
 
 type CreateUserRequest struct {
 	UserName     string `json:"username" validate:"required"`
-	PasswordHash string `json:"password_hash" validate:"required"`
+	PasswordHash string `json:"password" validate:"required"`
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
