@@ -14,4 +14,4 @@
 # DB
 *.db
 
-*.pem
+queries/
