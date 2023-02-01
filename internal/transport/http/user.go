@@ -28,7 +28,7 @@ type CreateUserRequest struct {
 	PasswordHash string `json:"password" validate:"required"`
 }
 
-func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -44,7 +44,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	convertedUser := createUserRequestToUser(user)
 
-	createdUser, err := h.Service.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
+	createdUser, err := h.UService.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -56,7 +56,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uid := vars["id"]
 	if uid == "" {
@@ -64,7 +64,7 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.Service.GetByID(r.Context(), uid)
+	usr, err := h.UService.GetByID(r.Context(), uid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -76,7 +76,7 @@ func (h *UserHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uname := vars["username"]
 	if uname == "" {
@@ -84,7 +84,7 @@ func (h *UserHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.Service.GetByUserName(r.Context(), uname)
+	usr, err := h.UService.GetByUserName(r.Context(), uname)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -96,7 +96,7 @@ func (h *UserHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *UserHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uid := vars["id"]
 	if uid == "" {
@@ -111,7 +111,7 @@ func (h *UserHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err := h.Service.UpdateUserPassword(r.Context(), user.ID, user.PasswordHash)
+	err := h.UService.UpdateUserPassword(r.Context(), user.ID, user.PasswordHash)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -124,7 +124,7 @@ func (h *UserHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uid := vars["id"]
 	if uid == "" {
@@ -132,7 +132,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.Service.DeleteUser(r.Context(), uid)
+	err := h.UService.DeleteUser(r.Context(), uid)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/thefueley/scholar-power-api/internal/db"
+	swoleExercise "github.com/thefueley/scholar-power-api/internal/exercise"
 	transportHttp "github.com/thefueley/scholar-power-api/internal/transport/http"
 	swoleuser "github.com/thefueley/scholar-power-api/internal/user"
 
@@ -25,8 +26,9 @@ func Run() error {
 	}
 
 	userService := swoleuser.NewUserService(store)
+	exerciseService := swoleExercise.NewExerciseService(store)
 
-	httpHandler := transportHttp.NewHandler(userService)
+	httpHandler := transportHttp.NewHandler(userService, exerciseService)
 	if err := httpHandler.Serve(); err != nil {
 		return err
 	}
