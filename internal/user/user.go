@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	swt "github.com/thefueley/scholar-power-api/token"
+	"github.com/thefueley/scholar-power-api/token"
 )
 
 var (
@@ -22,7 +22,7 @@ type User struct {
 }
 
 type UserStore interface {
-	CreateUser(context.Context, string, string) (User, error)
+	CreateUser(context.Context, string, string) (string, error)
 	GetByID(context.Context, string) (User, error)
 	GetByUserName(context.Context, string) (User, error)
 	UpdateUserPassword(context.Context, string, string) error
@@ -40,12 +40,12 @@ func NewUserService(store UserStore) *UserService {
 }
 
 func (us *UserService) CreateUser(ctx context.Context, username, password string) (string, error) {
-	usr, err := us.Store.CreateUser(ctx, username, password)
+	_, err := us.Store.CreateUser(ctx, username, password)
 	if err != nil {
 		fmt.Printf("error creating user '%v' or user already exists\n", username)
-		return usr.ID, err
+		return "", err
 	}
-	maker, err := swt.NewJWTMaker(os.Getenv("SCHOLAR_POWER_API_SIGNING_KEY"))
+	maker, err := token.NewJWTMaker(os.Getenv("SCHOLAR_POWER_API_SIGNING_KEY"))
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}
@@ -57,13 +57,13 @@ func (us *UserService) CreateUser(ctx context.Context, username, password string
 		fmt.Printf("Error: %v", err)
 	}
 
-	fmt.Printf("Token: %v\n", token)
-	fmt.Printf("Payload: %v\n", payload)
+	fmt.Printf("Timestamp: %v: Token: %v\n", time.Now(), token)
+	fmt.Printf("Timestamp: %v: Payload: %v\n", time.Now(), payload)
 	payload, err = maker.VerifyToken(token)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
-	fmt.Printf("Payload: %v\n", payload)
+	fmt.Printf("Timestamp: %v: Payload: %v\n", time.Now(), payload)
 
 	return token, nil
 }

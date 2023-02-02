@@ -6,3 +6,4 @@ makefile
 README.md
 LICENSE
 *.db
+queries/

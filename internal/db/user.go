@@ -16,13 +16,13 @@ type UserRow struct {
 	PasswordHash sql.NullString
 }
 
-func (d *Database) CreateUser(ctx context.Context, username, password string) (swoleuser.User, error) {
+func (d *Database) CreateUser(ctx context.Context, username, password string) (string, error) {
 	username = strings.ToLower(username)
 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return swoleuser.User{}, fmt.Errorf("create user: %w", err)
+		return "", fmt.Errorf("create user: %w", err)
 	}
 
 	passwordHash := string(hashedBytes)
@@ -30,11 +30,6 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 	createUserRow := UserRow{
 		UserName:     sql.NullString{String: username, Valid: true},
 		PasswordHash: sql.NullString{String: passwordHash, Valid: true},
-	}
-
-	newuser := swoleuser.User{
-		UserName:     username,
-		PasswordHash: passwordHash,
 	}
 
 	insertRow, err := d.ExecContext(ctx,
@@ -46,14 +41,14 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 	)
 
 	if err != nil {
-		return swoleuser.User{}, fmt.Errorf("create user: %w", err)
+		return "", fmt.Errorf("create user: %w", err)
 	}
 
 	if insertRow == nil {
-		return swoleuser.User{}, fmt.Errorf("create user: %w", err)
+		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return newuser, nil // TODO: return new user's id as well
+	return "", nil
 }
 
 func (d *Database) GetByID(ctx context.Context, id string) (swoleuser.User, error) {

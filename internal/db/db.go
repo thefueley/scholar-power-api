@@ -13,13 +13,13 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	dbConn, err := sql.Open("sqlite3", "./internal/db/scholarpower.db")
+	dbConn, err := sql.Open("sqlite3", "internal/db/scholarpower.db")
 	if err != nil {
-		return &Database{}, fmt.Errorf("Could not connect to db: %w", err)
+		return &Database{}, fmt.Errorf("could not connect to db: %w", err)
 	}
 
 	if err := dbConn.PingContext(context.Background()); err != nil {
-		return &Database{}, fmt.Errorf("Could not ping db: %w", err)
+		return &Database{}, fmt.Errorf("could not ping db: %w", err)
 	}
 
 	return &Database{dbConn}, nil

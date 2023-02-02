@@ -12,15 +12,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type UserHandler struct {
-	Router  *mux.Router
-	Service UserService
-	Server  *http.Server
+type SwoleHandler struct {
+	Router   *mux.Router
+	UService UserService
+	EService ExerciseService
+	Server   *http.Server
 }
 
-func NewHandler(service UserService) *UserHandler {
-	h := &UserHandler{
-		Service: service,
+func NewHandler(uservice UserService, eservice ExerciseService) *SwoleHandler {
+	h := &SwoleHandler{
+		UService: uservice,
+		EService: eservice,
 	}
 
 	h.Router = mux.NewRouter()
@@ -37,19 +39,26 @@ func NewHandler(service UserService) *UserHandler {
 	return h
 }
 
-func (h *UserHandler) mapRoutes() {
+func (h *SwoleHandler) mapRoutes() {
 	h.Router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "pong")
 	}).Methods("GET")
 
+	// User routes
 	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods("POST")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetByID).Methods("GET")
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetByUserName).Methods("GET")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods("PUT")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.DeleteUser)).Methods("DELETE")
+
+	// Exercise routes
+	h.Router.HandleFunc("/api/v1/exercise/name", h.GetExerciseByName).Methods("GET")
+	h.Router.HandleFunc("/api/v1/exercise/{id:[0-9]+}", h.GetExerciseByID).Methods("GET")
+	h.Router.HandleFunc("/api/v1/exercise/muscle", h.GetExerciseByMuscle).Methods("GET")
+	h.Router.HandleFunc("/api/v1/exercise/equipment", h.GetExerciseByEquipment).Methods("GET")
 }
 
-func (h *UserHandler) Serve() error {
+func (h *SwoleHandler) Serve() error {
 	go func() {
 		if err := h.Server.ListenAndServe(); err != nil {
 			log.Println(err.Error())
