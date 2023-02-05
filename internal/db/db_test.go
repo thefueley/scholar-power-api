@@ -1,3 +1,4 @@
+// build +integration
 package db
 
 import (
@@ -7,7 +8,7 @@ import (
 )
 
 func TestNewDatabase(t *testing.T) {
-	db, err := NewDatabase()
+	db, err := NewDatabase("")
 	require.NoError(t, err)
 	require.NotEmpty(t, db)
 }

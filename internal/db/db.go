@@ -12,8 +12,12 @@ type Database struct {
 	*sql.DB
 }
 
-func NewDatabase() (*Database, error) {
-	dbConn, err := sql.Open("sqlite3", "internal/db/scholarpower.db")
+func NewDatabase(path string) (*Database, error) {
+	if path == "" {
+		path = "scholarpower.db"
+	}
+
+	dbConn, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return &Database{}, fmt.Errorf("could not connect to db: %w", err)
 	}
