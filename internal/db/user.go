@@ -48,10 +48,10 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return "", nil
+	return passwordHash, nil
 }
 
-func (d *Database) GetByID(ctx context.Context, id string) (swoleuser.User, error) {
+func (d *Database) GetUserByID(ctx context.Context, id string) (swoleuser.User, error) {
 	var userRow UserRow
 	row := d.QueryRowContext(ctx, `SELECT * 
 	FROM user
@@ -66,7 +66,7 @@ func (d *Database) GetByID(ctx context.Context, id string) (swoleuser.User, erro
 	return userRowToUser(userRow), nil
 }
 
-func (d *Database) GetByUserName(ctx context.Context, username string) (swoleuser.User, error) {
+func (d *Database) GetUserByName(ctx context.Context, username string) (swoleuser.User, error) {
 	var userRow UserRow
 	row := d.QueryRowContext(ctx,
 		`SELECT id, username, password_hash 
@@ -103,6 +103,29 @@ func (d *Database) DeleteUser(ctx context.Context, id string) error {
 		return fmt.Errorf("could not delete user: %w", err)
 	}
 	return nil
+}
+
+func (d *Database) Login(ctx context.Context, username, password string) (string, error) {
+	username = strings.ToLower(username)
+	fmt.Printf("username: %s, password: %s\n", username, password)
+	var userRow UserRow
+	row := d.QueryRowContext(ctx,
+		`SELECT id, username, password_hash 
+		FROM user 
+		WHERE username = $1`, username)
+	err := row.Scan(&userRow.ID, &userRow.UserName, &userRow.PasswordHash)
+
+	if err != nil {
+		return "", fmt.Errorf("model.Login, row.Scan: %w", err)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userRow.PasswordHash.String), []byte(password))
+
+	if err != nil {
+		return "", fmt.Errorf("model.login, CompareHashAndPassword: %w", err)
+	}
+
+	return "", nil
 }
 
 func userRowToUser(ur UserRow) swoleuser.User {

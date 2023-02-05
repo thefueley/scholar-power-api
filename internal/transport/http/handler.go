@@ -16,13 +16,15 @@ type SwoleHandler struct {
 	Router   *mux.Router
 	UService UserService
 	EService ExerciseService
+	WService WorkoutService
 	Server   *http.Server
 }
 
-func NewHandler(uservice UserService, eservice ExerciseService) *SwoleHandler {
+func NewHandler(uservice UserService, eservice ExerciseService, wservice WorkoutService) *SwoleHandler {
 	h := &SwoleHandler{
 		UService: uservice,
 		EService: eservice,
+		WService: wservice,
 	}
 
 	h.Router = mux.NewRouter()
@@ -46,16 +48,24 @@ func (h *SwoleHandler) mapRoutes() {
 
 	// User routes
 	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods("POST")
-	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetByID).Methods("GET")
-	h.Router.HandleFunc("/api/v1/user/{username}", h.GetByUserName).Methods("GET")
+	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetUserByID).Methods("GET")
+	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUserByName).Methods("GET")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods("PUT")
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.DeleteUser)).Methods("DELETE")
+	h.Router.HandleFunc("/api/v1/auth", h.Login).Methods("POST")
 
 	// Exercise routes
 	h.Router.HandleFunc("/api/v1/exercise/name", h.GetExerciseByName).Methods("GET")
 	h.Router.HandleFunc("/api/v1/exercise/{id:[0-9]+}", h.GetExerciseByID).Methods("GET")
 	h.Router.HandleFunc("/api/v1/exercise/muscle", h.GetExerciseByMuscle).Methods("GET")
 	h.Router.HandleFunc("/api/v1/exercise/equipment", h.GetExerciseByEquipment).Methods("GET")
+
+	// Workout routes
+	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.CreateWorkout)).Methods("POST")
+	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", h.GetWorkoutByID).Methods("GET")
+	h.Router.HandleFunc("/api/v1/workout/user", h.GetWorkoutByUser).Methods("GET")
+	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", JWTAuth(h.UpdateWorkout)).Methods("PUT")
+	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", JWTAuth(h.DeleteWorkout)).Methods("DELETE")
 }
 
 func (h *SwoleHandler) Serve() error {

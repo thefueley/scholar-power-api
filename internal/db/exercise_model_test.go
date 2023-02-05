@@ -1,3 +1,4 @@
+// build +integration
 package db
 
 import (
@@ -8,7 +9,7 @@ import (
 )
 
 func TestGetExerciseByID(t *testing.T) {
-	db, err := NewDatabase()
+	db, err := NewDatabase("")
 	require.NoError(t, err)
 
 	exr, err := db.GetExerciseByID(context.Background(), "1")
@@ -21,7 +22,7 @@ func TestGetExerciseByID(t *testing.T) {
 }
 
 func TestGetExerciseByName(t *testing.T) {
-	db, err := NewDatabase()
+	db, err := NewDatabase("")
 	require.NoError(t, err)
 
 	exr, err := db.GetExerciseByName(context.Background(), "Pushups")
@@ -35,7 +36,7 @@ func TestGetExerciseByName(t *testing.T) {
 }
 
 func TestGetExerciseByMuscle(t *testing.T) {
-	db, err := NewDatabase()
+	db, err := NewDatabase("")
 	require.NoError(t, err)
 
 	exr, err := db.GetExerciseByMuscle(context.Background(), "chest")
@@ -49,7 +50,7 @@ func TestGetExerciseByMuscle(t *testing.T) {
 }
 
 func TestGetExerciseByEquipment(t *testing.T) {
-	db, err := NewDatabase()
+	db, err := NewDatabase("")
 	require.NoError(t, err)
 
 	exr, err := db.GetExerciseByEquipment(context.Background(), "barbell")

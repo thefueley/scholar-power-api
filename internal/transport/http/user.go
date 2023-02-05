@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,10 +14,11 @@ import (
 
 type UserService interface {
 	CreateUser(ctx context.Context, username string, password string) (string, error)
-	GetByID(ctx context.Context, uid string) (swoleuser.User, error)
-	GetByUserName(ctx context.Context, username string) (swoleuser.User, error)
+	GetUserByID(ctx context.Context, uid string) (swoleuser.User, error)
+	GetUserByName(ctx context.Context, username string) (swoleuser.User, error)
 	UpdateUserPassword(ctx context.Context, uid string, password string) error
 	DeleteUser(ctx context.Context, uid string) error
+	Login(ctx context.Context, username string, password string) (string, error)
 }
 
 type Response struct {
@@ -26,6 +28,11 @@ type Response struct {
 type CreateUserRequest struct {
 	UserName     string `json:"username" validate:"required"`
 	PasswordHash string `json:"password" validate:"required"`
+}
+
+type LoginRequest struct {
+	UserName string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +63,7 @@ func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *SwoleHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uid := vars["id"]
 	if uid == "" {
@@ -64,7 +71,7 @@ func (h *SwoleHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.UService.GetByID(r.Context(), uid)
+	usr, err := h.UService.GetUserByID(r.Context(), uid)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -76,7 +83,7 @@ func (h *SwoleHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *SwoleHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
+func (h *SwoleHandler) GetUserByName(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uname := vars["username"]
 	if uname == "" {
@@ -84,7 +91,7 @@ func (h *SwoleHandler) GetByUserName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.UService.GetByUserName(r.Context(), uname)
+	usr, err := h.UService.GetUserByName(r.Context(), uname)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -142,6 +149,28 @@ func (h *SwoleHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(Response{Message: "Poof, it's gone!"}); err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *SwoleHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var userLogin LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&userLogin); err != nil {
+		fmt.Printf("view.Login NewDecoder: %v\n", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	token, err := h.UService.Login(r.Context(), userLogin.UserName, userLogin.Password)
+	if err != nil {
+		fmt.Printf("view.Login Login: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(token); err != nil {
+		fmt.Printf("view.Login NewEncoder: %v\n", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

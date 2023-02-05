@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/thefueley/scholar-power-api/internal/db"
-	swoleExercise "github.com/thefueley/scholar-power-api/internal/exercise"
+	"github.com/thefueley/scholar-power-api/internal/exercise"
 	transportHttp "github.com/thefueley/scholar-power-api/internal/transport/http"
 	swoleuser "github.com/thefueley/scholar-power-api/internal/user"
+	"github.com/thefueley/scholar-power-api/internal/workout"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -14,7 +15,7 @@ import (
 func Run() error {
 	fmt.Println("Starting API server")
 
-	store, err := db.NewDatabase()
+	store, err := db.NewDatabase("internal/db/scholarpower.db")
 	if err != nil {
 		fmt.Println("error opening database")
 		return err
@@ -26,9 +27,10 @@ func Run() error {
 	}
 
 	userService := swoleuser.NewUserService(store)
-	exerciseService := swoleExercise.NewExerciseService(store)
+	exerciseService := exercise.NewExerciseService(store)
+	workoutService := workout.NewWorkoutService(store)
 
-	httpHandler := transportHttp.NewHandler(userService, exerciseService)
+	httpHandler := transportHttp.NewHandler(userService, exerciseService, workoutService)
 	if err := httpHandler.Serve(); err != nil {
 		return err
 	}

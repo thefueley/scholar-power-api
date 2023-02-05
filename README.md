@@ -21,8 +21,91 @@ Of course, you can always run `go run cmd/server/main.go`
 
 All endpoints that modify the resources will require a valid bearer token.
 
+## API Endpoints
+
+### User Routes
+
+Create User
+POST /api/v1/user
+Params: username: string, password: string
+Return: token or an error
+
+Get User By ID
+GET /api/v1/user/{id:[0-9]+}
+Params: None
+Return: User or an error
+
+Get User By Username
+GET /api/v1/user/{username}
+Params: None
+Return: User or an error
+
+Update User Password
+PUT /api/v1/user/{id:[0-9]+}
+Params: password: string
+Return: error
+
+Delete User
+DELETE /api/v1/user/{id:[0-9]+}
+Params: None
+Return: error
+
+Login
+POST /api/v1/auth
+Params: username: string, password: string
+Return: token or an error
+
+### Exercise routes
+
+Get Exercise By ID
+GET /api/v1/exercise/{id:[0-9]+}
+Params: None
+Return: Exercise or an error
+
+Get Exercise By Name
+GET /api/v1/exercise/name
+Params: name: string
+Return: []Exercise or an error
+
+Get Exercise By Muscle Group
+GET /api/v1/exercise/muscle
+Params: muscle: string
+Return: []Exercise or an error
+
+Get Exercise By Equipment
+GET /api/v1/exercise/equipment
+Params: equipment: string
+Return: []Exercise or an error
+
+### Workout routes
+
+Create Workout
+POST /api/v1/workout
+Params: workout_id: string, name: string, sets: string, reps: string, creator_id: string, exercise_id: string
+Return: Workout
+
+Get Workout By ID
+GET /api/v1/workout/{workout_id:[0-9]+}
+Params: None
+Return: []Workout or an error
+
+Get Workout By User
+GET /api/v1/workout/user
+Params: name: string
+Return: []Workout or an error
+
+Update Workout
+PUT /api/v1/workout/{workout_id:[0-9]+}
+Params: workout_id: string, name: string, sets: string, reps: string, creator_id: string, exercise_id: string
+Return: error
+
+Delete Workout
+DELETE /api/v1/workout/{workout_id:[0-9]+}
+Params: None
+Return: error
+
 ## References
 
 Exercises will be populated from [API Ninjas Exercises API](https://www.api-ninjas.com/api/exercises)
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api)
