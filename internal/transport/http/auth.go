@@ -26,7 +26,7 @@ func JWTAuth(original func(w http.ResponseWriter, r *http.Request)) func(w http.
 			return
 		}
 
-		fmt.Printf("authHeaderParts[1]: %v\n", authHeaderParts[1])
+		// fmt.Printf("authHeaderParts[1]: %v\n", authHeaderParts[1])
 
 		if err := Verify(authHeaderParts[1]); err != nil {
 			fmt.Printf("Error: %v\n", err)

@@ -106,28 +106,27 @@ func (h *SwoleHandler) GetUserByName(w http.ResponseWriter, r *http.Request) {
 func (h *SwoleHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uid := vars["id"]
+
 	if uid == "" {
+		fmt.Println("controller.UpdateUserPassword: uid is empty")
 		w.WriteHeader(http.StatusBadRequest)
-		return
 	}
 
-	var user swoleuser.User
-	user.ID = uid
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	var newPassword LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&newPassword); err != nil {
+		fmt.Printf("controller.UpdateUserPassword NewDecoder: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
 	}
 
-	err := h.UService.UpdateUserPassword(r.Context(), user.ID, user.PasswordHash)
+	err := h.UService.UpdateUserPassword(r.Context(), uid, newPassword.Password)
 	if err != nil {
-		log.Print(err)
+		fmt.Printf("controller.UpdateUserPassword: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
-	if err := json.NewEncoder(w).Encode(user); err != nil {
+	if err := json.NewEncoder(w).Encode(newPassword); err != nil {
+		fmt.Printf("controller.UpdateUserPassword NewEncoder: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
 }
 
