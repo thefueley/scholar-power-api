@@ -84,7 +84,7 @@ func (d *Database) UpdateUserPassword(ctx context.Context, uid string, password 
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return fmt.Errorf("update user password: %w", err)
+		fmt.Println("model.UpdateUserPassword, GenerateFromPassword: %w", err)
 	}
 
 	passwordHash := string(hashedBytes)
@@ -92,8 +92,9 @@ func (d *Database) UpdateUserPassword(ctx context.Context, uid string, password 
 	_, err = d.ExecContext(ctx, `UPDATE user SET password_hash = $1 WHERE id = $2`, passwordHash, uid)
 
 	if err != nil {
-		return fmt.Errorf("could not update user password: %w", err)
+		fmt.Println("model.UpdateUserPassword, ExecContext: %w", err)
 	}
+
 	return nil
 }
 
@@ -107,7 +108,6 @@ func (d *Database) DeleteUser(ctx context.Context, id string) error {
 
 func (d *Database) Login(ctx context.Context, username, password string) (string, error) {
 	username = strings.ToLower(username)
-	fmt.Printf("username: %s, password: %s\n", username, password)
 	var userRow UserRow
 	row := d.QueryRowContext(ctx,
 		`SELECT id, username, password_hash 
