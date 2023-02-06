@@ -133,7 +133,7 @@ func (db *Database) UpdateWorkout(ctx context.Context, workout workout.Workout) 
 func (db *Database) DeleteWorkout(ctx context.Context, id string) error {
 	_, err := db.ExecContext(ctx,
 		`DELETE FROM workout_plan
-		WHERE workout_id = $1`,
+		WHERE id = $1`,
 		id,
 	)
 

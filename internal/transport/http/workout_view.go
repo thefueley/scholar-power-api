@@ -132,7 +132,7 @@ func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	wid := vars["workout_id"]
+	wid := vars["id"]
 
 	wo, err := h.WService.GetWorkoutByID(r.Context(), wid)
 	if err != nil {
