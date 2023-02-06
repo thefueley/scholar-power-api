@@ -44,7 +44,7 @@ func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Wo
 	row, err := db.QueryContext(ctx,
 		`SELECT id, workout_id, name, sets, reps, created_at, creator_id, exercise_id
 		FROM workout_plan
-		WHERE workout_id = $1`,
+		WHERE id = $1`,
 		id,
 	)
 
@@ -114,12 +114,13 @@ func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workou
 func (db *Database) UpdateWorkout(ctx context.Context, workout workout.Workout) error {
 	_, err := db.ExecContext(ctx,
 		`UPDATE workout_plan
-		SET name = $1, sets = $2, reps = $3
-		WHERE workout_id = $4`,
+		SET name = $1, sets = $2, reps = $3, exercise_id = $4
+		WHERE id = $5`,
 		workout.Name,
 		workout.Sets,
 		workout.Reps,
-		workout.WorkoutID,
+		workout.ExerciseID,
+		workout.ID,
 	)
 
 	if err != nil {

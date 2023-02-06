@@ -64,3 +64,30 @@ func Verify(token string) error {
 
 	return nil
 }
+
+// check username from token
+func Requestor(token string) (string, error) {
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, swt.ErrInvalidToken
+		}
+		return []byte(os.Getenv("SCHOLAR_POWER_API_SIGNING_KEY")), nil
+	}
+
+	jwtToken, err := jwt.ParseWithClaims(token, &swt.Payload{}, keyFunc)
+	if err != nil {
+		verr, ok := err.(*jwt.ValidationError)
+		if ok && errors.Is(verr.Inner, swt.ErrExpiredToken) {
+			return "", swt.ErrExpiredToken
+		}
+		return "", swt.ErrInvalidToken
+	}
+
+	payload, ok := jwtToken.Claims.(*swt.Payload)
+	if !ok {
+		return "", swt.ErrInvalidToken
+	}
+
+	return payload.Subject, nil
+}
