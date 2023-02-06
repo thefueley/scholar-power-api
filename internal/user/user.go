@@ -63,7 +63,7 @@ func (us *UserService) CreateUser(ctx context.Context, username, password string
 		fmt.Printf("Error: %v\n", err)
 	}
 
-	fmt.Printf("Created user: %v", username)
+	fmt.Printf("Created user: %v\n", username)
 
 	return token, nil
 }
