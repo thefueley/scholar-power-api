@@ -3,9 +3,11 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -118,7 +120,14 @@ func (h *SwoleHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	err := h.UService.UpdateUserPassword(r.Context(), uid, newPassword.Password)
+	err := h.AuthZ(r, uid)
+	if err != nil {
+		fmt.Printf("controller.UpdateUserPassword AuthZ: %v\n", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err = h.UService.UpdateUserPassword(r.Context(), uid, newPassword.Password)
 	if err != nil {
 		fmt.Printf("controller.UpdateUserPassword: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -138,7 +147,14 @@ func (h *SwoleHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.UService.DeleteUser(r.Context(), uid)
+	err := h.AuthZ(r, uid)
+	if err != nil {
+		fmt.Printf("controller.DeletePassword AuthZ: %v\n", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	err = h.UService.DeleteUser(r.Context(), uid)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -179,4 +195,23 @@ func createUserRequestToUser(req CreateUserRequest) swoleuser.User {
 		UserName:     req.UserName,
 		PasswordHash: req.PasswordHash,
 	}
+}
+
+func (h *SwoleHandler) AuthZ(r *http.Request, OwnerID string) error {
+	authHeader := r.Header["Authorization"]
+	authHeaderParts := strings.Split(authHeader[0], " ")
+	requestorName, err := Requestor(authHeaderParts[1])
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return err
+	}
+
+	requestor, err := h.UService.GetUserByName(context.Background(), requestorName)
+
+	if requestor.ID != OwnerID {
+		fmt.Println("controller.AuthZ: requestor.ID != OwnerID")
+		return errors.New("Unauthorized")
+	}
+
+	return nil
 }

@@ -62,9 +62,9 @@ func (h *SwoleHandler) mapRoutes() {
 
 	// Workout routes
 	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.CreateWorkout)).Methods("POST")
-	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", h.GetWorkoutByID).Methods("GET")
+	h.Router.HandleFunc("/api/v1/workout/{id:[0-9]+}", h.GetWorkoutByID).Methods("GET")
 	h.Router.HandleFunc("/api/v1/workout/user", h.GetWorkoutByUser).Methods("GET")
-	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", JWTAuth(h.UpdateWorkout)).Methods("PUT")
+	h.Router.HandleFunc("/api/v1/workout/{id:[0-9]+}", JWTAuth(h.UpdateWorkout)).Methods("PUT")
 	h.Router.HandleFunc("/api/v1/workout/{workout_id:[0-9]+}", JWTAuth(h.DeleteWorkout)).Methods("DELETE")
 }
 

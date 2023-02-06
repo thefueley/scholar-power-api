@@ -53,18 +53,17 @@ func (us *UserService) CreateUser(ctx context.Context, username, password string
 
 	duration := 15 * time.Minute
 
-	token, payload, err := maker.CreateToken(username, duration)
+	token, _, err := maker.CreateToken(username, duration)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}
 
-	fmt.Printf("Timestamp: %v: Token: %v\n", time.Now(), token)
-	fmt.Printf("Timestamp: %v: Payload: %v\n", time.Now(), payload)
-	payload, err = maker.VerifyToken(token)
+	_, err = maker.VerifyToken(token)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
-	fmt.Printf("Timestamp: %v: Payload: %v\n", time.Now(), payload)
+
+	fmt.Printf("Created user: %v", username)
 
 	return token, nil
 }

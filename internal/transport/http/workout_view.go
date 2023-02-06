@@ -43,6 +43,13 @@ func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 
 	convertedWorkout := workoutRequestToWorkout(req)
 
+	err := h.AuthZ(r, convertedWorkout.CreatorID)
+	if err != nil {
+		fmt.Printf("view.CreateWorkout AuthZ: %v\n", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	if err := h.WService.CreateWorkout(r.Context(), convertedWorkout); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -56,7 +63,7 @@ func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *SwoleHandler) GetWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	wid := vars["workout_id"]
+	wid := vars["id"]
 
 	workout, err := h.WService.GetWorkoutByID(r.Context(), wid)
 	if err != nil {
@@ -91,6 +98,9 @@ func (h *SwoleHandler) GetWorkoutByUser(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
 	var req WorkoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Printf("error decoding UpdateWorkout request: %v\n", err)
@@ -99,6 +109,14 @@ func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	convertedWorkout := workoutRequestToWorkout(req)
+	convertedWorkout.ID = id
+
+	err := h.AuthZ(r, convertedWorkout.CreatorID)
+	if err != nil {
+		fmt.Printf("view.UpdateWorkout AuthZ: %v\n", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	if err := h.WService.UpdateWorkout(r.Context(), convertedWorkout); err != nil {
 		fmt.Printf("view.UpdateWorkout: %v\n", err)
@@ -115,6 +133,20 @@ func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	wid := vars["workout_id"]
+
+	wo, err := h.WService.GetWorkoutByID(r.Context(), wid)
+	if err != nil {
+		fmt.Printf("view.DeleteWorkout GetWorkoutByID: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = h.AuthZ(r, wo[0].CreatorID)
+	if err != nil {
+		fmt.Printf("view.DeleteWorkout AuthZ: %v\n", err)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	if err := h.WService.DeleteWorkout(r.Context(), wid); err != nil {
 		fmt.Printf("view.DeleteWorkout: %v\n", err)
