@@ -2,35 +2,25 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/thefueley/scholar-power-api/internal/workout"
 )
 
-type WorkoutRow struct {
-	ID         string
-	WorkoutID  sql.NullString
-	Name       sql.NullString
-	Sets       sql.NullString
-	Reps       sql.NullString
-	CreatedAt  sql.NullString
-	CreatorID  sql.NullString
-	ExerciseID sql.NullString
-}
-
 func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) error {
 	_, err := db.ExecContext(ctx,
-		`INSERT INTO workout_plan (workout_id, name, sets, reps, created_at, creator_id, exercise_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		workout.WorkoutID,
+		`INSERT INTO workout_plan (workout_id, name, sets, reps, load, created_at, creator_id, exercise_id, instructions_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		workout.PlanID,
 		workout.Name,
 		workout.Sets,
 		workout.Reps,
+		workout.Load,
 		workout.CreatedAt,
 		workout.CreatorID,
 		workout.ExerciseID,
+		workout.InstructionsID,
 	)
 
 	if err != nil {
@@ -40,10 +30,64 @@ func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) 
 	return nil
 }
 
-func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Workout, error) {
+func (db *Database) GetWorkoutByID(ctx context.Context, plan_id string) ([]workout.WorkoutRow, error) {
 	row, err := db.QueryContext(ctx,
-		`SELECT id, workout_id, name, sets, reps, created_at, creator_id, exercise_id
-		FROM workout_plan
+		`SELECT 
+		workout.id, 
+		workout.plan_id, 
+		workout.name, 
+		workout.sets, 
+		workout.reps, 
+		workout.load, 
+		exercise.name, 
+		exercise.muscle, 
+		exercise.equipment, 
+		exercise.instructions 
+		FROM workout 
+		JOIN exercise ON workout.exercise_id = exercise.id 
+		WHERE workout.plan_id = $1;`,
+		plan_id,
+	)
+
+	if err != nil {
+		fmt.Println("model.GetWorkoutByID: QueryContext: ", err.Error())
+		log.Fatal(err)
+	}
+
+	defer row.Close()
+
+	foundWorkouts := make([]workout.WorkoutRow, 0)
+
+	for row.Next() {
+		var wo workout.WorkoutRow
+		if err := row.Scan(&wo.ID, &wo.PlanID, &wo.Name, &wo.Sets, &wo.Reps, &wo.Load, &wo.ExerciseName, &wo.ExerciseMuscle, &wo.ExerciseEquipment, &wo.ExerciseInstructions); err != nil {
+			fmt.Println("model.GetWorkoutByID: Scan: ", err.Error())
+			log.Fatal(err)
+		}
+		foundWorkouts = append(foundWorkouts, wo)
+	}
+
+	if err != nil {
+		return []workout.WorkoutRow{}, fmt.Errorf("could not get workout: %w", err)
+	}
+	return foundWorkouts, nil
+}
+
+func (db *Database) GetWorkoutDetails(ctx context.Context, id string) ([]workout.Workout, error) {
+	row, err := db.QueryContext(ctx,
+		`SELECT 
+		id, 
+		plan_id, 
+		name, 
+		sets, 
+		reps, 
+		load, 
+		created_at, 
+		edited_at, 
+		creator_id, 
+		exercise_id, 
+		instructions_id
+		FROM workout 
 		WHERE id = $1`,
 		id,
 	)
@@ -57,11 +101,11 @@ func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Wo
 	foundWorkouts := make([]workout.Workout, 0)
 
 	for row.Next() {
-		var workout workout.Workout
-		if err := row.Scan(&workout.ID, &workout.WorkoutID, &workout.Name, &workout.Sets, &workout.Reps, &workout.CreatedAt, &workout.CreatorID, &workout.ExerciseID); err != nil {
+		var wo workout.Workout
+		if err := row.Scan(&wo.ID, &wo.PlanID, &wo.Name, &wo.Sets, &wo.Reps, &wo.Load, &wo.CreatedAt, &wo.EditedAt, &wo.CreatorID, &wo.ExerciseID, &wo.InstructionsID); err != nil {
 			log.Fatal(err)
 		}
-		foundWorkouts = append(foundWorkouts, workout)
+		foundWorkouts = append(foundWorkouts, wo)
 	}
 
 	if err != nil {
@@ -70,7 +114,7 @@ func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Wo
 	return foundWorkouts, nil
 }
 
-func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workout.Workout, error) {
+func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workout.WorkoutShortInfo, error) {
 	userRow := db.QueryRowContext(ctx,
 		`SELECT id
 		FROM user
@@ -83,9 +127,9 @@ func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workou
 	}
 
 	row, err := db.QueryContext(ctx,
-		`SELECT id, workout_id, name, sets, reps, created_at, creator_id, exercise_id
-		FROM workout_plan
-		WHERE creator_id = $1`,
+		`SELECT plan_id, name, created_at, edited_at, creator_id 
+		FROM workout WHERE creator_id = $1 
+		GROUP BY name`,
 		userID,
 	)
 
@@ -95,18 +139,19 @@ func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workou
 
 	defer row.Close()
 
-	foundWorkouts := make([]workout.Workout, 0)
+	foundWorkouts := make([]workout.WorkoutShortInfo, 0)
 
 	for row.Next() {
-		var wor workout.Workout
-		if err := row.Scan(&wor.ID, &wor.WorkoutID, &wor.Name, &wor.Sets, &wor.Reps, &wor.CreatedAt, &wor.CreatorID, &wor.ExerciseID); err != nil {
+		var wo workout.WorkoutShortInfo
+		if err := row.Scan(&wo.PlanID, &wo.Name, &wo.CreatedAt, &wo.EditedAt, &wo.CreatorID); err != nil {
 			log.Fatal(err)
 		}
-		foundWorkouts = append(foundWorkouts, wor)
+
+		foundWorkouts = append(foundWorkouts, wo)
 	}
 
 	if err != nil {
-		return []workout.Workout{}, fmt.Errorf("could not find workout: %w", err)
+		return []workout.WorkoutShortInfo{}, fmt.Errorf("could not find workout: %w", err)
 	}
 	return foundWorkouts, nil
 }
@@ -142,17 +187,4 @@ func (db *Database) DeleteWorkout(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-func workoutRowToWorkout(wor WorkoutRow) workout.Workout {
-	return workout.Workout{
-		ID:         wor.ID,
-		WorkoutID:  wor.WorkoutID.String,
-		Name:       wor.Name.String,
-		Sets:       wor.Sets.String,
-		Reps:       wor.Reps.String,
-		CreatedAt:  wor.CreatedAt.String,
-		CreatorID:  wor.CreatorID.String,
-		ExerciseID: wor.ExerciseID.String,
-	}
 }
