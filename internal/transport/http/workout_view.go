@@ -67,10 +67,11 @@ func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 
 func (h *SwoleHandler) GetWorkoutByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	wid := vars["id"]
+	wid := vars["plan_id"]
 
 	workout, err := h.WService.GetWorkoutByID(r.Context(), wid)
 	if err != nil {
+		fmt.Println("view.GetWorkoutByID: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

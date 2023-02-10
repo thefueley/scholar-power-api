@@ -73,8 +73,8 @@ func (ws *WorkoutService) CreateWorkout(ctx context.Context, wo Workout) error {
 	return nil
 }
 
-func (ws *WorkoutService) GetWorkoutByID(ctx context.Context, id string) ([]WorkoutRow, error) {
-	wo, err := ws.Store.GetWorkoutByID(ctx, id)
+func (ws *WorkoutService) GetWorkoutByID(ctx context.Context, plan_id string) ([]WorkoutRow, error) {
+	wo, err := ws.Store.GetWorkoutByID(ctx, plan_id)
 	if err != nil {
 		fmt.Println("controller.GetWorkoutByID: ", err)
 		return []WorkoutRow{}, ErrWorkoutNotFound

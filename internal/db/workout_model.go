@@ -30,7 +30,7 @@ func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) 
 	return nil
 }
 
-func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.WorkoutRow, error) {
+func (db *Database) GetWorkoutByID(ctx context.Context, plan_id string) ([]workout.WorkoutRow, error) {
 	row, err := db.QueryContext(ctx,
 		`SELECT 
 		workout.id, 
@@ -45,11 +45,12 @@ func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Wo
 		exercise.instructions 
 		FROM workout 
 		JOIN exercise ON workout.exercise_id = exercise.id 
-		WHERE workout.plan_id = 1;`,
-		id,
+		WHERE workout.plan_id = $1;`,
+		plan_id,
 	)
 
 	if err != nil {
+		fmt.Println("model.GetWorkoutByID: QueryContext: ", err.Error())
 		log.Fatal(err)
 	}
 
@@ -60,6 +61,7 @@ func (db *Database) GetWorkoutByID(ctx context.Context, id string) ([]workout.Wo
 	for row.Next() {
 		var wo workout.WorkoutRow
 		if err := row.Scan(&wo.ID, &wo.PlanID, &wo.Name, &wo.Sets, &wo.Reps, &wo.Load, &wo.ExerciseName, &wo.ExerciseMuscle, &wo.ExerciseEquipment, &wo.ExerciseInstructions); err != nil {
+			fmt.Println("model.GetWorkoutByID: Scan: ", err.Error())
 			log.Fatal(err)
 		}
 		foundWorkouts = append(foundWorkouts, wo)
@@ -125,7 +127,7 @@ func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workou
 	}
 
 	row, err := db.QueryContext(ctx,
-		`SELECT id, name, created_at, edited_at, creator_id 
+		`SELECT plan_id, name, created_at, edited_at, creator_id 
 		FROM workout WHERE creator_id = $1 
 		GROUP BY name`,
 		userID,
