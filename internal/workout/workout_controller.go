@@ -47,11 +47,11 @@ type WorkoutShortInfo struct {
 
 type WorkoutStore interface {
 	CreateWorkout(context.Context, Workout) error
-	GetWorkoutByID(context.Context, string) ([]WorkoutRow, error)
+	GetWorkoutExercises(context.Context, string) ([]WorkoutRow, error)
 	GetWorkoutDetails(context.Context, string) ([]Workout, error)
-	GetWorkoutByUser(context.Context, string) ([]WorkoutShortInfo, error)
-	UpdateWorkout(context.Context, Workout) error
-	DeleteWorkout(context.Context, string) error
+	GetWorkoutsByUser(context.Context, string) ([]WorkoutShortInfo, error)
+	UpdateWorkout(context.Context, []Workout) error
+	DeleteWorkout(context.Context, []string) error
 }
 
 type WorkoutService struct {
@@ -73,8 +73,8 @@ func (ws *WorkoutService) CreateWorkout(ctx context.Context, wo Workout) error {
 	return nil
 }
 
-func (ws *WorkoutService) GetWorkoutByID(ctx context.Context, plan_id string) ([]WorkoutRow, error) {
-	wo, err := ws.Store.GetWorkoutByID(ctx, plan_id)
+func (ws *WorkoutService) GetWorkoutExercises(ctx context.Context, plan_id string) ([]WorkoutRow, error) {
+	wo, err := ws.Store.GetWorkoutExercises(ctx, plan_id)
 	if err != nil {
 		fmt.Println("controller.GetWorkoutByID: ", err)
 		return []WorkoutRow{}, ErrWorkoutNotFound
@@ -82,8 +82,8 @@ func (ws *WorkoutService) GetWorkoutByID(ctx context.Context, plan_id string) ([
 	return wo, nil
 }
 
-func (ws *WorkoutService) GetWorkoutDetails(ctx context.Context, id string) ([]Workout, error) {
-	wo, err := ws.Store.GetWorkoutDetails(ctx, id)
+func (ws *WorkoutService) GetWorkoutDetails(ctx context.Context, plan_id string) ([]Workout, error) {
+	wo, err := ws.Store.GetWorkoutDetails(ctx, plan_id)
 	if err != nil {
 		fmt.Println("controller.GetWorkoutDetails: ", err)
 		return []Workout{}, ErrWorkoutNotFound
@@ -91,8 +91,8 @@ func (ws *WorkoutService) GetWorkoutDetails(ctx context.Context, id string) ([]W
 	return wo, nil
 }
 
-func (ws *WorkoutService) GetWorkoutByUser(ctx context.Context, user string) ([]WorkoutShortInfo, error) {
-	wo, err := ws.Store.GetWorkoutByUser(ctx, user)
+func (ws *WorkoutService) GetWorkoutsByUser(ctx context.Context, user string) ([]WorkoutShortInfo, error) {
+	wo, err := ws.Store.GetWorkoutsByUser(ctx, user)
 	if err != nil {
 		fmt.Println("controller.GetWorkoutByUser: ", err)
 		return []WorkoutShortInfo{}, ErrWorkoutNotFound
@@ -100,7 +100,7 @@ func (ws *WorkoutService) GetWorkoutByUser(ctx context.Context, user string) ([]
 	return wo, nil
 }
 
-func (ws *WorkoutService) UpdateWorkout(ctx context.Context, wo Workout) error {
+func (ws *WorkoutService) UpdateWorkout(ctx context.Context, wo []Workout) error {
 	err := ws.Store.UpdateWorkout(ctx, wo)
 	if err != nil {
 		fmt.Println("controller.UpdateWorkout: ", err)
@@ -109,7 +109,7 @@ func (ws *WorkoutService) UpdateWorkout(ctx context.Context, wo Workout) error {
 	return nil
 }
 
-func (ws *WorkoutService) DeleteWorkout(ctx context.Context, id string) error {
+func (ws *WorkoutService) DeleteWorkout(ctx context.Context, id []string) error {
 	err := ws.Store.DeleteWorkout(ctx, id)
 	if err != nil {
 		fmt.Println("controller.DeleteWorkout: ", err)

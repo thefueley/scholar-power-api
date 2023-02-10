@@ -14,44 +14,46 @@ func TestCreateWorkout(t *testing.T) {
 	require.NoError(t, err)
 
 	testWorkout := workout.Workout{
-		PlanID:     "1",
-		Name:       "Test Workout",
-		Sets:       "1",
-		Reps:       "1",
-		CreatorID:  "1",
-		ExerciseID: "1",
+		PlanID:         "999999",
+		Name:           "999999",
+		Sets:           "999999",
+		Reps:           "999999",
+		Load:           "999999",
+		CreatorID:      "3",
+		ExerciseID:     "1",
+		InstructionsID: "1",
 	}
 
 	createWorkoutErr := db.CreateWorkout(context.Background(), testWorkout)
 	require.NoError(t, createWorkoutErr)
 }
 
-func TestGetWorkoutByID(t *testing.T) {
+func TestGetWorkoutExercises(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	wo, err := db.GetWorkoutByID(context.Background(), "1")
+	wo, err := db.GetWorkoutExercises(context.Background(), "999999")
 	require.NoError(t, err)
 
 	require.NotEmpty(t, wo)
 
 	for _, v := range wo {
-		if v.Name == "Test Workout" {
-			require.Equal(t, v.Name, "Test Workout")
+		if v.Name == "999999" {
+			require.Equal(t, v.Name, "999999")
 		}
 	}
 }
 
-func TestGetWorkoutByUser(t *testing.T) {
+func TestGetWorkoutsByUser(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	wo, err := db.GetWorkoutByUser(context.Background(), "test")
+	wo, err := db.GetWorkoutsByUser(context.Background(), "test1")
 	require.NoError(t, err)
 	require.NotEmpty(t, wo)
 	for _, v := range wo {
-		if v.Name == "Test Workout" {
-			require.Equal(t, v.Name, "Test Workout")
+		if v.Name == "999999" {
+			require.Equal(t, v.Name, "999999")
 		}
 	}
 }

@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS workout_plan;
+DROP TABLE IF EXISTS workout;
