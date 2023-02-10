@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/thefueley/scholar-power-api/internal/workout"
 )
 
 func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) error {
 	_, err := db.ExecContext(ctx,
-		`INSERT INTO workout_plan (workout_id, name, sets, reps, load, created_at, creator_id, exercise_id, instructions_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		`INSERT INTO workout (plan_id, name, sets, reps, load, creator_id, exercise_id, instructions_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		workout.PlanID,
 		workout.Name,
 		workout.Sets,
 		workout.Reps,
 		workout.Load,
-		workout.CreatedAt,
 		workout.CreatorID,
 		workout.ExerciseID,
 		workout.InstructionsID,
@@ -30,7 +30,7 @@ func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) 
 	return nil
 }
 
-func (db *Database) GetWorkoutByID(ctx context.Context, plan_id string) ([]workout.WorkoutRow, error) {
+func (db *Database) GetWorkoutExercises(ctx context.Context, plan_id string) ([]workout.WorkoutRow, error) {
 	row, err := db.QueryContext(ctx,
 		`SELECT 
 		workout.id, 
@@ -73,7 +73,7 @@ func (db *Database) GetWorkoutByID(ctx context.Context, plan_id string) ([]worko
 	return foundWorkouts, nil
 }
 
-func (db *Database) GetWorkoutDetails(ctx context.Context, id string) ([]workout.Workout, error) {
+func (db *Database) GetWorkoutDetails(ctx context.Context, plan_id string) ([]workout.Workout, error) {
 	row, err := db.QueryContext(ctx,
 		`SELECT 
 		id, 
@@ -88,8 +88,8 @@ func (db *Database) GetWorkoutDetails(ctx context.Context, id string) ([]workout
 		exercise_id, 
 		instructions_id
 		FROM workout 
-		WHERE id = $1`,
-		id,
+		WHERE plan_id = $1`,
+		plan_id,
 	)
 
 	if err != nil {
@@ -114,7 +114,7 @@ func (db *Database) GetWorkoutDetails(ctx context.Context, id string) ([]workout
 	return foundWorkouts, nil
 }
 
-func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workout.WorkoutShortInfo, error) {
+func (db *Database) GetWorkoutsByUser(ctx context.Context, user string) ([]workout.WorkoutShortInfo, error) {
 	userRow := db.QueryRowContext(ctx,
 		`SELECT id
 		FROM user
@@ -156,35 +156,89 @@ func (db *Database) GetWorkoutByUser(ctx context.Context, user string) ([]workou
 	return foundWorkouts, nil
 }
 
-func (db *Database) UpdateWorkout(ctx context.Context, workout workout.Workout) error {
-	_, err := db.ExecContext(ctx,
-		`UPDATE workout_plan
-		SET name = $1, sets = $2, reps = $3, exercise_id = $4
-		WHERE id = $5`,
-		workout.Name,
-		workout.Sets,
-		workout.Reps,
-		workout.ExerciseID,
-		workout.ID,
-	)
-
+func (db *Database) UpdateWorkout(ctx context.Context, updatedWorkouts []workout.Workout) error {
+	// get current workouts from plan_id
+	currentWorkouts, err := db.GetWorkoutDetails(ctx, updatedWorkouts[0].PlanID)
 	if err != nil {
-		return fmt.Errorf("could not update workout: %w", err)
+		return fmt.Errorf("could not get current workouts: %w", err)
+	}
+
+	finalWorkouts := make([]workout.Workout, 0)
+
+	// compare current workouts to new workouts
+	// if current workout is outdated, update it
+	for _, updated := range updatedWorkouts {
+		for _, current := range currentWorkouts {
+			if updated.ID == current.ID {
+				oneWorkout := reconcileWorkout(current, updated)
+				finalWorkouts = append(finalWorkouts, oneWorkout)
+			}
+		}
+	}
+
+	// update workouts
+	for k := range finalWorkouts {
+		_, err := db.ExecContext(ctx,
+			`UPDATE workout SET 
+			name = $1, 
+			sets = $2, 
+			reps = $3, 
+			load = $4, 
+			edited_at = $5,
+			exercise_id = $6, 
+			instructions_id = $7 
+			WHERE id = $8`,
+			finalWorkouts[k].Name,
+			finalWorkouts[k].Sets,
+			finalWorkouts[k].Reps,
+			finalWorkouts[k].Load,
+			time.Now(),
+			finalWorkouts[k].ExerciseID,
+			finalWorkouts[k].InstructionsID,
+			finalWorkouts[k].ID,
+		)
+
+		if err != nil {
+			return fmt.Errorf("could not update workout: %w", err)
+		}
 	}
 
 	return nil
 }
 
-func (db *Database) DeleteWorkout(ctx context.Context, id string) error {
-	_, err := db.ExecContext(ctx,
-		`DELETE FROM workout_plan
-		WHERE id = $1`,
-		id,
-	)
+func (db *Database) DeleteWorkout(ctx context.Context, id []string) error {
+	for _, v := range id {
+		_, err := db.ExecContext(ctx,
+			`DELETE FROM workout
+			WHERE id = $1`,
+			v,
+		)
 
-	if err != nil {
-		return fmt.Errorf("could not delete workout: %w", err)
+		if err != nil {
+			return fmt.Errorf("could not delete workout: %w", err)
+		}
 	}
-
 	return nil
+}
+
+func reconcileWorkout(current, updated workout.Workout) workout.Workout {
+	if updated.Name == "" {
+		updated.Name = current.Name
+	}
+	if updated.Sets == "" {
+		updated.Sets = current.Sets
+	}
+	if updated.Reps == "" {
+		updated.Reps = current.Reps
+	}
+	if updated.Load == "" {
+		updated.Load = current.Load
+	}
+	if updated.ExerciseID == "" {
+		updated.ExerciseID = current.ExerciseID
+	}
+	if updated.InstructionsID == "" {
+		updated.InstructionsID = current.InstructionsID
+	}
+	return updated
 }
