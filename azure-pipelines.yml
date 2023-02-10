@@ -78,7 +78,7 @@ stages:
         messageType: 'embeds'
         embeds: |
           [{
-          "title": "$(Build.BuildId) Push to TEST ✅",
+          "title": "Build: $(Build.BuildId) Push to TEST ✅",
           "description": "All Stages Completed",
           "author": {"name": "Azure DevOps"}
           }]
