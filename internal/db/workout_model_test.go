@@ -14,7 +14,7 @@ func TestCreateWorkout(t *testing.T) {
 	require.NoError(t, err)
 
 	testWorkout := workout.Workout{
-		WorkoutID:  "1",
+		PlanID:     "1",
 		Name:       "Test Workout",
 		Sets:       "1",
 		Reps:       "1",

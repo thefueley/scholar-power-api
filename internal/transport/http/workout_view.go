@@ -12,8 +12,9 @@ import (
 
 type WorkoutService interface {
 	CreateWorkout(ctx context.Context, wo workout.Workout) error
-	GetWorkoutByID(ctx context.Context, id string) ([]workout.Workout, error)
-	GetWorkoutByUser(ctx context.Context, user string) ([]workout.Workout, error)
+	GetWorkoutByID(ctx context.Context, id string) ([]workout.WorkoutRow, error)
+	GetWorkoutDetails(ctx context.Context, id string) ([]workout.Workout, error)
+	GetWorkoutByUser(ctx context.Context, user string) ([]workout.WorkoutShortInfo, error)
 	UpdateWorkout(ctx context.Context, wo workout.Workout) error
 	DeleteWorkout(ctx context.Context, id string) error
 }
@@ -23,14 +24,17 @@ type WorkoutResponse struct {
 }
 
 type WorkoutRequest struct {
-	ID         string `json:"id"`
-	WorkoutID  string `json:"workout_id"`
-	Name       string `json:"name"`
-	Sets       string `json:"sets"`
-	Reps       string `json:"reps"`
-	CreatedAt  string `json:"created_at"`
-	CreatorID  string `json:"creator_id"`
-	ExerciseID string `json:"exercise_id"`
+	ID             string `json:"id"`
+	PlanID         string `json:"plan_id"`
+	Name           string `json:"name"`
+	Sets           string `json:"sets"`
+	Reps           string `json:"reps"`
+	Load           string `json:"load"`
+	CreatedAt      string `json:"created_at"`
+	EditedAt       string `json:"edited_at"`
+	CreatorID      string `json:"creator_id"`
+	ExerciseID     string `json:"exercise_id"`
+	InstructionsID string `json:"instructions_id"`
 }
 
 func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +138,7 @@ func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	wid := vars["id"]
 
-	wo, err := h.WService.GetWorkoutByID(r.Context(), wid)
+	wo, err := h.WService.GetWorkoutDetails(r.Context(), wid)
 	if err != nil {
 		fmt.Printf("view.DeleteWorkout GetWorkoutByID: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -162,13 +166,16 @@ func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 
 func workoutRequestToWorkout(req WorkoutRequest) workout.Workout {
 	return workout.Workout{
-		ID:         req.ID,
-		WorkoutID:  req.WorkoutID,
-		Name:       req.Name,
-		Sets:       req.Sets,
-		Reps:       req.Reps,
-		CreatedAt:  req.CreatedAt,
-		CreatorID:  req.CreatorID,
-		ExerciseID: req.ExerciseID,
+		ID:             req.ID,
+		PlanID:         req.PlanID,
+		Name:           req.Name,
+		Sets:           req.Sets,
+		Reps:           req.Reps,
+		Load:           req.Load,
+		CreatedAt:      req.CreatedAt,
+		EditedAt:       req.EditedAt,
+		CreatorID:      req.CreatorID,
+		ExerciseID:     req.ExerciseID,
+		InstructionsID: req.InstructionsID,
 	}
 }
