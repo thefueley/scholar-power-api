@@ -51,7 +51,7 @@ func (us *UserService) CreateUser(ctx context.Context, username, password string
 		fmt.Printf("Error: %v", err)
 	}
 
-	duration := 15 * time.Minute
+	duration := 24 * time.Hour
 
 	token, _, err := maker.CreateToken(username, duration)
 	if err != nil {
@@ -116,7 +116,7 @@ func (us *UserService) Login(ctx context.Context, username, password string) (st
 		fmt.Printf("Error: %v", err)
 	}
 
-	duration := 15 * time.Minute
+	duration := 24 * time.Hour
 
 	token, _, err := maker.CreateToken(username, duration)
 	if err != nil {
