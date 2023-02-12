@@ -5,6 +5,7 @@ import (
 
 	"github.com/thefueley/scholar-power-api/internal/db"
 	"github.com/thefueley/scholar-power-api/internal/exercise"
+	"github.com/thefueley/scholar-power-api/internal/history"
 	transportHttp "github.com/thefueley/scholar-power-api/internal/transport/http"
 	swoleuser "github.com/thefueley/scholar-power-api/internal/user"
 	"github.com/thefueley/scholar-power-api/internal/workout"
@@ -13,7 +14,7 @@ import (
 )
 
 func Run() error {
-	fmt.Println("Starting API server")
+	fmt.Println("Starting Scholar Power API server")
 
 	store, err := db.NewDatabase("internal/db/scholarpower.db")
 	if err != nil {
@@ -29,8 +30,9 @@ func Run() error {
 	userService := swoleuser.NewUserService(store)
 	exerciseService := exercise.NewExerciseService(store)
 	workoutService := workout.NewWorkoutService(store)
+	historyService := history.NewHistoryService(store)
 
-	httpHandler := transportHttp.NewHandler(userService, exerciseService, workoutService)
+	httpHandler := transportHttp.NewHandler(userService, exerciseService, workoutService, historyService)
 	if err := httpHandler.Serve(); err != nil {
 		return err
 	}

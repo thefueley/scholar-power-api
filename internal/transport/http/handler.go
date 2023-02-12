@@ -17,14 +17,16 @@ type SwoleHandler struct {
 	UService UserService
 	EService ExerciseService
 	WService WorkoutService
+	HService HistoryService
 	Server   *http.Server
 }
 
-func NewHandler(uservice UserService, eservice ExerciseService, wservice WorkoutService) *SwoleHandler {
+func NewHandler(uservice UserService, eservice ExerciseService, wservice WorkoutService, hservice HistoryService) *SwoleHandler {
 	h := &SwoleHandler{
 		UService: uservice,
 		EService: eservice,
 		WService: wservice,
+		HService: hservice,
 	}
 
 	h.Router = mux.NewRouter()
@@ -66,6 +68,12 @@ func (h *SwoleHandler) mapRoutes() {
 	h.Router.HandleFunc("/api/v1/workout/{plan_id:[0-9]+}", JWTAuth(h.GetWorkoutExercises)).Methods("GET")
 	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.UpdateWorkout)).Methods("PUT")
 	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.DeleteWorkout)).Methods("DELETE")
+
+	// History routes
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.CreateHistory)).Methods("POST")
+	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.GetHistory)).Methods("GET")
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.UpdateHistory)).Methods("PUT")
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.DeleteHistory)).Methods("DELETE")
 }
 
 func (h *SwoleHandler) Serve() error {
