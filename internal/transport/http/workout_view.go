@@ -104,28 +104,30 @@ func (h *SwoleHandler) GetWorkoutExercises(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *SwoleHandler) GetWorkoutsByUser(w http.ResponseWriter, r *http.Request) {
-	var req WorkoutRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("error decoding GetWorkoutByUser request: %v\n", err)
+	vars := mux.Vars(r)
+	username := vars["username"]
+
+	uid, err := h.UService.GetUserByName(r.Context(), username)
+	if err != nil {
+		fmt.Println("view.GetWorkoutsByUser: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	convertedWorkoutRequest := workoutRequestToWorkout(req)
-	if convertedWorkoutRequest.CreatorID == "" {
+	if uid.ID == "" {
 		fmt.Println("view.GetWorkoutsByUser: creator_id is empty")
 		http.Error(w, "creator_id is empty", http.StatusBadRequest)
 		return
 	}
 
-	err := h.AuthZ(r, convertedWorkoutRequest.CreatorID)
+	err = h.AuthZ(r, uid.ID)
 	if err != nil {
 		fmt.Printf("view.GetWorkoutsByUser AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	workout, err := h.WService.GetWorkoutsByUser(r.Context(), req.Name)
+	workout, err := h.WService.GetWorkoutsByUser(r.Context(), username)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
