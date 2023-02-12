@@ -110,31 +110,31 @@ func (h *SwoleHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request
 	uid := vars["id"]
 
 	if uid == "" {
-		fmt.Println("controller.UpdateUserPassword: uid is empty")
+		fmt.Println("view.UpdateUserPassword: uid is empty")
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	var newPassword LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&newPassword); err != nil {
-		fmt.Printf("controller.UpdateUserPassword NewDecoder: %v\n", err)
+		fmt.Printf("view.UpdateUserPassword NewDecoder: %v\n", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	err := h.AuthZ(r, uid)
 	if err != nil {
-		fmt.Printf("controller.UpdateUserPassword AuthZ: %v\n", err)
+		fmt.Printf("view.UpdateUserPassword AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	err = h.UService.UpdateUserPassword(r.Context(), uid, newPassword.Password)
 	if err != nil {
-		fmt.Printf("controller.UpdateUserPassword: %v\n", err)
+		fmt.Printf("view.UpdateUserPassword: %v\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	if err := json.NewEncoder(w).Encode(newPassword); err != nil {
-		fmt.Printf("controller.UpdateUserPassword NewEncoder: %v\n", err)
+		fmt.Printf("view.UpdateUserPassword NewEncoder: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -149,7 +149,7 @@ func (h *SwoleHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	err := h.AuthZ(r, uid)
 	if err != nil {
-		fmt.Printf("controller.DeletePassword AuthZ: %v\n", err)
+		fmt.Printf("view.DeletePassword AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -208,8 +208,13 @@ func (h *SwoleHandler) AuthZ(r *http.Request, OwnerID string) error {
 
 	requestor, err := h.UService.GetUserByName(context.Background(), requestorName)
 
+	if err != nil {
+		fmt.Printf("view.user: AuthZ: %v\n", err)
+		return err
+	}
+
 	if requestor.ID != OwnerID {
-		fmt.Println("controller.AuthZ: requestor.ID != OwnerID")
+		fmt.Println("view.AuthZ: requestor.ID != OwnerID")
 		return errors.New("Unauthorized")
 	}
 
