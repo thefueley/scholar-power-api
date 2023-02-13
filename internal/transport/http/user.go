@@ -55,7 +55,7 @@ func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, err := h.UService.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusForbidden)
+		http.Error(w, "user already exists", http.StatusForbidden)
 		return
 	}
 
