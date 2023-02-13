@@ -31,6 +31,7 @@ func NewHandler(uservice UserService, eservice ExerciseService, wservice Workout
 
 	h.Router = mux.NewRouter()
 	h.mapRoutes()
+	h.Router.Use(mux.CORSMethodMiddleware(h.Router))
 	h.Router.Use(JSONMiddleware)
 	h.Router.Use(LoggingMiddleware)
 	h.Router.Use(TimeoutMiddleware)
@@ -46,34 +47,35 @@ func NewHandler(uservice UserService, eservice ExerciseService, wservice Workout
 func (h *SwoleHandler) mapRoutes() {
 	h.Router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "pong")
-	}).Methods("GET")
+	}).Methods(http.MethodGet, http.MethodOptions)
 
 	// User routes
-	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods("POST")
-	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetUserByID).Methods("GET")
-	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUserByName).Methods("GET")
-	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods("PUT")
-	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.DeleteUser)).Methods("DELETE")
-	h.Router.HandleFunc("/api/v1/auth", h.Login).Methods("POST")
+	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetUserByID).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUserByName).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.DeleteUser)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/auth", h.Login).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
 
 	// Exercise routes
-	h.Router.HandleFunc("/api/v1/exercise/name", h.GetExerciseByName).Methods("GET")
-	h.Router.HandleFunc("/api/v1/exercise/{id:[0-9]+}", h.GetExerciseByID).Methods("GET")
-	h.Router.HandleFunc("/api/v1/exercise/muscle", h.GetExerciseByMuscle).Methods("GET")
-	h.Router.HandleFunc("/api/v1/exercise/equipment", h.GetExerciseByEquipment).Methods("GET")
+	h.Router.HandleFunc("/api/v1/exercise/name", h.GetExerciseByName).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/exercise/{id:[0-9]+}", h.GetExerciseByID).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/exercise/muscle", h.GetExerciseByMuscle).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/exercise/equipment", h.GetExerciseByEquipment).Methods(http.MethodGet, http.MethodOptions)
 
 	// Workout routes
-	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.CreateWorkout)).Methods("POST")
-	h.Router.HandleFunc("/api/v1/workout/user/{username}", JWTAuth(h.GetWorkoutsByUser)).Methods("GET")
-	h.Router.HandleFunc("/api/v1/workout/{plan_id:[0-9]+}", JWTAuth(h.GetWorkoutExercises)).Methods("GET")
-	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.UpdateWorkout)).Methods("PUT")
-	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.DeleteWorkout)).Methods("DELETE")
+	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.CreateWorkout)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout/user/{username}", JWTAuth(h.GetWorkoutsByUser)).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout/{plan_id:[0-9]+}", JWTAuth(h.GetWorkoutExercises)).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.UpdateWorkout)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.DeleteWorkout)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
 
 	// History routes
-	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.CreateHistory)).Methods("POST")
-	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.GetHistory)).Methods("GET")
-	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.UpdateHistory)).Methods("PUT")
-	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.DeleteHistory)).Methods("DELETE")
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.CreateHistory)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.GetHistory)).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.UpdateHistory)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.DeleteHistory)).Methods(http.MethodPut, http.MethodPatch, http.MethodOptions)
+
 }
 
 func (h *SwoleHandler) Serve() error {
