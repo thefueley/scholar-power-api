@@ -50,7 +50,7 @@ func (h *SwoleHandler) mapRoutes() {
 	}).Methods(http.MethodGet, http.MethodOptions)
 
 	// User routes
-	h.Router.HandleFunc("/api/v1/user", h.CreateUser).Methods(http.MethodPost, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/register", h.CreateUser).Methods(http.MethodPost, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", h.GetUserByID).Methods(http.MethodGet, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/user/{username}", h.GetUserByName).Methods(http.MethodGet, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/user/{id:[0-9]+}", JWTAuth(h.UpdateUserPassword)).Methods(http.MethodPut, http.MethodOptions)
