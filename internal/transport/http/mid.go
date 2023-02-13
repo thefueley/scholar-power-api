@@ -3,12 +3,26 @@ package http
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func JSONMiddleware(next http.Handler) http.Handler {
+	if os.Getenv("API_MODE") == "dev" {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "https://deft-torte-4578e5.netlify.app, http://localhost:8100/")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Access-Control-Allow-Origin", "https://deft-torte-4578e5.netlify.app")
