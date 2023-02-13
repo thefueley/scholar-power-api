@@ -55,7 +55,7 @@ func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	createdUser, err := h.UService.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusForbidden)
 		return
 	}
 
@@ -179,7 +179,7 @@ func (h *SwoleHandler) Login(w http.ResponseWriter, r *http.Request) {
 	token, err := h.UService.Login(r.Context(), userLogin.UserName, userLogin.Password)
 	if err != nil {
 		fmt.Printf("view.Login Login: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
