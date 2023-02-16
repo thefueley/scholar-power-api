@@ -92,7 +92,11 @@ func (db *Database) GetExerciseByMuscle(ctx context.Context, muscle string) ([]e
 	}
 
 	if err != nil {
-		return []exercise.Exercise{}, fmt.Errorf("could not get exercise: %w", err)
+		return []exercise.Exercise{}, fmt.Errorf("no exercises for muscle: %v", muscle)
+	}
+
+	if len(foundExercises) == 0 {
+		return []exercise.Exercise{}, fmt.Errorf("no exercises for muscle: %v", muscle)
 	}
 	return foundExercises, nil
 }

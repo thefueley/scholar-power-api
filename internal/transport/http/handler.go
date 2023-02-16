@@ -60,7 +60,7 @@ func (h *SwoleHandler) mapRoutes() {
 	// Exercise routes
 	h.Router.HandleFunc("/api/v1/exercise/name", h.GetExerciseByName).Methods(http.MethodGet, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/exercise/{id:[0-9]+}", h.GetExerciseByID).Methods(http.MethodGet, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/exercise/muscle", h.GetExerciseByMuscle).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/exercise/{muscle}", h.GetExerciseByMuscle).Methods(http.MethodGet, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/exercise/equipment", h.GetExerciseByEquipment).Methods(http.MethodGet, http.MethodOptions)
 
 	// Workout routes

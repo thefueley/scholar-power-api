@@ -56,7 +56,7 @@ func (es *ExerciseService) GetExerciseByName(ctx context.Context, id string) ([]
 func (es *ExerciseService) GetExerciseByMuscle(ctx context.Context, id string) ([]Exercise, error) {
 	ex, err := es.Store.GetExerciseByMuscle(ctx, id)
 	if err != nil {
-		fmt.Println("error getting exercise by muscle", err)
+		fmt.Println("error getting exercise by muscle: ", err)
 		return []Exercise{}, ErrExerciseNotFound
 	}
 	return ex, nil
