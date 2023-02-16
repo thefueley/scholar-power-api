@@ -261,7 +261,7 @@ func workoutPlanRequestToWorkout(req WorkoutPlanRequest) []workout.Workout {
 	var UID = req.UID
 	var PlanID = uuid.New().String()
 	var Name = req.Name
-	now := time.Now().String()
+	now := time.Now().Format("01-02-2006 15:04")
 
 	workoutInfo := make([]workout.Workout, 0)
 
