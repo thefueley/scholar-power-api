@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/thefueley/scholar-power-api/internal/workout"
 )
 
 type WorkoutService interface {
-	CreateWorkout(ctx context.Context, wo workout.Workout) error
+	CreateWorkout(ctx context.Context, wo []workout.Workout) error
 	GetWorkoutExercises(ctx context.Context, id string) ([]workout.WorkoutRow, error)
 	GetWorkoutDetails(ctx context.Context, plan_id string) ([]workout.Workout, error)
 	GetWorkoutsByUser(ctx context.Context, user string) ([]workout.WorkoutShortInfo, error)
@@ -37,24 +39,37 @@ type WorkoutRequest struct {
 	InstructionsID string `json:"instructions_id"`
 }
 
+type WorkoutLineItem struct {
+	Sets       string `json:"sets"`
+	Reps       string `json:"reps"`
+	Load       string `json:"load"`
+	ExerciseID string `json:"exercise_id"`
+}
+
+type WorkoutPlanRequest struct {
+	UID       string            `json:"uid"`
+	Name      string            `json:"name"`
+	Exercises []WorkoutLineItem `json:"exercises"`
+}
+
 func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
-	var req WorkoutRequest
+	var req WorkoutPlanRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		fmt.Printf("error decoding CreateWorkout request: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	convertedWorkout := workoutRequestToWorkout(req)
+	userWorkoutPlan := workoutPlanRequestToWorkout(req)
 
-	err := h.AuthZ(r, convertedWorkout.CreatorID)
+	err := h.AuthZ(r, userWorkoutPlan[0].CreatorID)
 	if err != nil {
 		fmt.Printf("view.CreateWorkout AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	if err := h.WService.CreateWorkout(r.Context(), convertedWorkout); err != nil {
+	if err := h.WService.CreateWorkout(r.Context(), userWorkoutPlan); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -66,31 +81,25 @@ func (h *SwoleHandler) CreateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SwoleHandler) GetWorkoutExercises(w http.ResponseWriter, r *http.Request) {
-	var req WorkoutRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("error decoding CreateWorkout request: %v\n", err)
+
+	vars := mux.Vars(r)
+	pid := vars["plan_id"]
+
+	wod, err := h.WService.GetWorkoutDetails(r.Context(), pid)
+	if err != nil {
+		fmt.Println("view.GetWorkoutExercises: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	vars := mux.Vars(r)
-	wid := vars["plan_id"]
-
-	convertedWorkoutRequest := workoutRequestToWorkout(req)
-	if convertedWorkoutRequest.CreatorID == "" {
-		fmt.Println("view.GetWorkoutExercises: creator_id is empty")
-		http.Error(w, "creator_id is empty", http.StatusBadRequest)
-		return
-	}
-
-	err := h.AuthZ(r, convertedWorkoutRequest.CreatorID)
+	err = h.AuthZ(r, wod[0].CreatorID)
 	if err != nil {
 		fmt.Printf("view.GetWorkoutExercises AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	workout, err := h.WService.GetWorkoutExercises(r.Context(), wid)
+	workout, err := h.WService.GetWorkoutExercises(r.Context(), pid)
 	if err != nil {
 		fmt.Println("view.GetWorkoutExercises: ", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -140,16 +149,19 @@ func (h *SwoleHandler) GetWorkoutsByUser(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	pid := vars["plan_id"]
+
 	var updateWorkoutRequest []WorkoutRequest
 	if err := json.NewDecoder(r.Body).Decode(&updateWorkoutRequest); err != nil {
 		fmt.Printf("error decoding UpdateWorkout request: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if updateWorkoutRequest[0].PlanID == "" || updateWorkoutRequest[0].CreatorID == "" {
-		fmt.Println("view.UpdateWorkout: plan_id or creator_id is empty")
-		http.Error(w, "plan_id or creator_id is empty", http.StatusBadRequest)
+	if pid == "" {
+		fmt.Println("view.UpdateWorkout: plan_id is empty")
+		http.Error(w, "plan_id is empty", http.StatusBadRequest)
 		return
 	}
 
@@ -157,10 +169,18 @@ func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 
 	for wo := range updateWorkoutRequest {
 		oneWorkout := workoutRequestToWorkout(updateWorkoutRequest[wo])
+		oneWorkout.PlanID = pid
 		allUpdateWorkoutRequestItems = append(allUpdateWorkoutRequestItems, oneWorkout)
 	}
 
-	err := h.AuthZ(r, allUpdateWorkoutRequestItems[0].CreatorID)
+	rid, err := h.WService.GetWorkoutDetails(r.Context(), pid)
+	if err != nil {
+		fmt.Println("view.UpdateWorkout: ", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = h.AuthZ(r, rid[0].CreatorID)
 	if err != nil {
 		fmt.Printf("view.UpdateWorkout AuthZ: %v\n", err)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -180,14 +200,16 @@ func (h *SwoleHandler) UpdateWorkout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
-	var deleteWorkoutRequest WorkoutRequest
-	if err := json.NewDecoder(r.Body).Decode(&deleteWorkoutRequest); err != nil {
-		fmt.Printf("error decoding DeleteWorkout request: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	vars := mux.Vars(r)
+	pid := vars["plan_id"]
+
+	if pid == "" {
+		fmt.Println("view.UpdateWorkout: plan_id is empty")
+		http.Error(w, "plan_id is empty", http.StatusBadRequest)
 		return
 	}
 
-	workoutsInPlan, err := h.WService.GetWorkoutDetails(r.Context(), deleteWorkoutRequest.PlanID)
+	workoutsInPlan, err := h.WService.GetWorkoutDetails(r.Context(), pid)
 	if err != nil {
 		fmt.Printf("view.DeleteWorkout GetWorkoutDetails: %v\n", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -212,7 +234,7 @@ func (h *SwoleHandler) DeleteWorkout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(WorkoutResponse{Message: "workout deleted"}); err != nil {
+	if err := json.NewEncoder(w).Encode(WorkoutResponse{Message: "Poof! It's gone."}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -232,4 +254,30 @@ func workoutRequestToWorkout(req WorkoutRequest) workout.Workout {
 		ExerciseID:     req.ExerciseID,
 		InstructionsID: req.InstructionsID,
 	}
+}
+
+func workoutPlanRequestToWorkout(req WorkoutPlanRequest) []workout.Workout {
+
+	var UID = req.UID
+	var PlanID = uuid.New().String()
+	var Name = req.Name
+	now := time.Now().String()
+
+	workoutInfo := make([]workout.Workout, 0)
+
+	for _, v := range req.Exercises {
+		workoutInfo = append(workoutInfo, workout.Workout{
+			PlanID:         PlanID,
+			Name:           Name,
+			Sets:           v.Sets,
+			Reps:           v.Reps,
+			Load:           v.Load,
+			CreatedAt:      now,
+			EditedAt:       now,
+			CreatorID:      UID,
+			ExerciseID:     v.ExerciseID,
+			InstructionsID: v.ExerciseID,
+		})
+	}
+	return workoutInfo
 }

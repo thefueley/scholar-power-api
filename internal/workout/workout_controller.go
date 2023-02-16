@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -38,7 +40,7 @@ type WorkoutRow struct {
 }
 
 type WorkoutShortInfo struct {
-	PlanID    string
+	PlanID    uuid.UUID
 	Name      string
 	CreatedAt string
 	EditedAt  string
@@ -46,7 +48,7 @@ type WorkoutShortInfo struct {
 }
 
 type WorkoutStore interface {
-	CreateWorkout(context.Context, Workout) error
+	CreateWorkout(context.Context, []Workout) error
 	GetWorkoutExercises(context.Context, string) ([]WorkoutRow, error)
 	GetWorkoutDetails(context.Context, string) ([]Workout, error)
 	GetWorkoutsByUser(context.Context, string) ([]WorkoutShortInfo, error)
@@ -64,7 +66,7 @@ func NewWorkoutService(store WorkoutStore) *WorkoutService {
 	}
 }
 
-func (ws *WorkoutService) CreateWorkout(ctx context.Context, wo Workout) error {
+func (ws *WorkoutService) CreateWorkout(ctx context.Context, wo []Workout) error {
 	err := ws.Store.CreateWorkout(ctx, wo)
 	if err != nil {
 		fmt.Println("controller.CreateWorkout: ", err)

@@ -40,6 +40,10 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		createUserRow.PasswordHash,
 	)
 
+	newuserid := d.QueryRowContext(ctx, `SELECT id FROM user WHERE username = $1`, username)
+	var uid string
+	newuserid.Scan(&uid)
+
 	if err != nil {
 		return "", fmt.Errorf("create user: %w", err)
 	}
@@ -48,7 +52,7 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return passwordHash, nil
+	return uid, nil
 }
 
 func (d *Database) GetUserByID(ctx context.Context, id string) (swoleuser.User, error) {
@@ -125,7 +129,7 @@ func (d *Database) Login(ctx context.Context, username, password string) (string
 		return "", fmt.Errorf("model.login, CompareHashAndPassword: %w", err)
 	}
 
-	return "", nil
+	return userRow.ID.String, nil
 }
 
 func userRowToUser(ur UserRow) swoleuser.User {

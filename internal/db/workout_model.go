@@ -9,22 +9,26 @@ import (
 	"github.com/thefueley/scholar-power-api/internal/workout"
 )
 
-func (db *Database) CreateWorkout(ctx context.Context, workout workout.Workout) error {
-	_, err := db.ExecContext(ctx,
-		`INSERT INTO workout (plan_id, name, sets, reps, load, creator_id, exercise_id, instructions_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-		workout.PlanID,
-		workout.Name,
-		workout.Sets,
-		workout.Reps,
-		workout.Load,
-		workout.CreatorID,
-		workout.ExerciseID,
-		workout.InstructionsID,
-	)
+func (db *Database) CreateWorkout(ctx context.Context, workout []workout.Workout) error {
+	for _, wo := range workout {
+		_, err := db.ExecContext(ctx,
+			`INSERT INTO workout (plan_id, name, sets, reps, load, created_at, edited_at, creator_id, exercise_id, instructions_id)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+			wo.PlanID,
+			wo.Name,
+			wo.Sets,
+			wo.Reps,
+			wo.Load,
+			wo.CreatedAt,
+			wo.EditedAt,
+			wo.CreatorID,
+			wo.ExerciseID,
+			wo.InstructionsID,
+		)
 
-	if err != nil {
-		return fmt.Errorf("could not create workout: %w", err)
+		if err != nil {
+			return fmt.Errorf("could not create workout: %w", err)
+		}
 	}
 
 	return nil

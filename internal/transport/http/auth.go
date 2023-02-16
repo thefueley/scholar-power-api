@@ -26,8 +26,6 @@ func JWTAuth(original func(w http.ResponseWriter, r *http.Request)) func(w http.
 			return
 		}
 
-		// fmt.Printf("authHeaderParts[1]: %v\n", authHeaderParts[1])
-
 		if err := Verify(authHeaderParts[1]); err != nil {
 			fmt.Printf("Error: %v\n", err)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -65,7 +63,7 @@ func Verify(token string) error {
 	return nil
 }
 
-// check username from token
+// check uid from token
 func Requestor(token string) (string, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -89,5 +87,5 @@ func Requestor(token string) (string, error) {
 		return "", swt.ErrInvalidToken
 	}
 
-	return payload.Subject, nil
+	return payload.UserID, nil
 }

@@ -41,7 +41,7 @@ func NewUserService(store UserStore) *UserService {
 }
 
 func (us *UserService) CreateUser(ctx context.Context, username, password string) (string, error) {
-	_, err := us.Store.CreateUser(ctx, username, password)
+	uid, err := us.Store.CreateUser(ctx, username, password)
 	if err != nil {
 		fmt.Printf("error creating user '%v' or user already exists\n", username)
 		return "", err
@@ -53,7 +53,7 @@ func (us *UserService) CreateUser(ctx context.Context, username, password string
 
 	duration := 24 * time.Hour
 
-	token, _, err := maker.CreateToken(username, duration)
+	token, _, err := maker.CreateToken(uid, username, duration)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}
@@ -105,7 +105,7 @@ func (us *UserService) DeleteUser(ctx context.Context, id string) error {
 }
 
 func (us *UserService) Login(ctx context.Context, username, password string) (string, error) {
-	_, err := us.Store.Login(ctx, username, password)
+	uid, err := us.Store.Login(ctx, username, password)
 	if err != nil {
 		fmt.Println("controller.Login", err)
 		return "", err
@@ -118,7 +118,7 @@ func (us *UserService) Login(ctx context.Context, username, password string) (st
 
 	duration := 24 * time.Hour
 
-	token, _, err := maker.CreateToken(username, duration)
+	token, _, err := maker.CreateToken(uid, username, duration)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}

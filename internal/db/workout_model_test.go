@@ -23,8 +23,9 @@ func TestCreateWorkout(t *testing.T) {
 		ExerciseID:     "1",
 		InstructionsID: "1",
 	}
+	workouts := []workout.Workout{testWorkout}
 
-	createWorkoutErr := db.CreateWorkout(context.Background(), testWorkout)
+	createWorkoutErr := db.CreateWorkout(context.Background(), workouts)
 	require.NoError(t, createWorkoutErr)
 }
 
