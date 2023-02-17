@@ -66,22 +66,21 @@ func (h *SwoleHandler) GetExerciseByName(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *SwoleHandler) GetExerciseByMuscle(w http.ResponseWriter, r *http.Request) {
-	var req ExerciseRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Printf("error decoding GetExerciseByMuscle request: %v\n", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	vars := mux.Vars(r)
+	muscleGroup := vars["muscle"]
+
+	if muscleGroup == "" {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	convertedExercise := exerciseRequestToExercise(req)
-
-	exercise, err := h.EService.GetExerciseByMuscle(r.Context(), convertedExercise.Muscle)
+	exercises, err := h.EService.GetExerciseByMuscle(r.Context(), muscleGroup)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "exercises for muscle group not found", http.StatusNotFound)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(exercise); err != nil {
+	if err := json.NewEncoder(w).Encode(exercises); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
