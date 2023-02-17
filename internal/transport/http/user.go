@@ -200,21 +200,21 @@ func createUserRequestToUser(req CreateUserRequest) swoleuser.User {
 func (h *SwoleHandler) AuthZ(r *http.Request, OwnerID string) error {
 	authHeader := r.Header["Authorization"]
 	authHeaderParts := strings.Split(authHeader[0], " ")
-	requestorName, err := Requestor(authHeaderParts[1])
+	requestor, err := Requestor(authHeaderParts[1])
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return err
 	}
 
-	requestor, err := h.UService.GetUserByName(context.Background(), requestorName)
+	requestorID, err := h.UService.GetUserByID(context.Background(), requestor)
 
 	if err != nil {
 		fmt.Printf("view.user: AuthZ: %v\n", err)
 		return err
 	}
 
-	if requestor.ID != OwnerID {
-		fmt.Println("view.AuthZ: requestor.ID != OwnerID")
+	if requestorID.ID != OwnerID {
+		fmt.Println("view.AuthZ: requestorID.ID != OwnerID")
 		return errors.New("Unauthorized")
 	}
 

@@ -17,10 +17,11 @@ func main() {
 
 	fmt.Printf("Secret Key: %v\n", maker)
 
+	uid := RandomString(10)
 	username := "Phobos"
 	duration := 10 * time.Minute
 
-	token, payload, err := maker.CreateToken(username, duration)
+	token, payload, err := maker.CreateToken(uid, username, duration)
 	if err != nil {
 		fmt.Printf("Error: %v", err)
 	}

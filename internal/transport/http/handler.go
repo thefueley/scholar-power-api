@@ -45,6 +45,7 @@ func NewHandler(uservice UserService, eservice ExerciseService, wservice Workout
 }
 
 func (h *SwoleHandler) mapRoutes() {
+
 	h.Router.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "pong")
 	}).Methods(http.MethodGet, http.MethodOptions)
@@ -66,9 +67,9 @@ func (h *SwoleHandler) mapRoutes() {
 	// Workout routes
 	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.CreateWorkout)).Methods(http.MethodPost, http.MethodOptions)
 	h.Router.HandleFunc("/api/v1/workout/user/{username}", JWTAuth(h.GetWorkoutsByUser)).Methods(http.MethodGet, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/workout/{plan_id:[0-9]+}", JWTAuth(h.GetWorkoutExercises)).Methods(http.MethodGet, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.UpdateWorkout)).Methods(http.MethodPut, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/workout", JWTAuth(h.DeleteWorkout)).Methods(http.MethodDelete, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout/{plan_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}", JWTAuth(h.GetWorkoutExercises)).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout/{plan_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}", JWTAuth(h.UpdateWorkout)).Methods(http.MethodPut, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/workout/{plan_id:[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}", JWTAuth(h.DeleteWorkout)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// History routes
 	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.CreateHistory)).Methods(http.MethodPost, http.MethodOptions)
