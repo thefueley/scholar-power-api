@@ -72,7 +72,7 @@ Get workout plans by user (JWT required) (username is from "Get info by id")
 Get exercises in workout plan (JWT required) (plan_id is from above command)
 `curl -iL -H "Authorization: Bearer ${TOKEN}" https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json"`
 
-Update workout plan (JWT required) (id's in -d must come from above command)
+Update workout plan (JWT required) (Only id is required. All other params optional. id's in -d must come from above command)
 `curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json" -d [{"id": "15","reps": "15","load": "999"},{"id": "16","reps": "14","load": "888"}]`
 
 Delete workout plan (JWT required)
