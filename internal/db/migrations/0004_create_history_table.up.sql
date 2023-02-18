@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT DEFAULT (strftime('%d-%m-%Y', CURRENT_TIMESTAMP)) NOT NULL,
+    date TEXT DEFAULT (strftime('%m-%d-%Y', CURRENT_TIMESTAMP)) NOT NULL,
     duration TEXT DEFAULT (strftime('%H-%M-%S', CURRENT_TIMESTAMP)) NOT NULL,
     notes TEXT,
     plan_id INTEGER NOT NULL,
