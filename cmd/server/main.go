@@ -16,7 +16,7 @@ import (
 func Run() error {
 	fmt.Println("Starting Scholar Power API server")
 
-	store, err := db.NewDatabase("internal/db/scholarpower.db")
+	store, err := db.NewDatabase("internal/db/data/scholarpower.db")
 	if err != nil {
 		fmt.Println("error opening database")
 		return err
