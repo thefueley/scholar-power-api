@@ -31,7 +31,7 @@ key:
 	go run cmd/cli/key/main.go
 
 fresh:
-	rm internal/db/scholarpower.db
+	rm internal/db/data/scholarpower.db
 	go run cmd/server/main.go
 # ==============================================================================
 test:
