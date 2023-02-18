@@ -14,7 +14,7 @@ type Database struct {
 
 func NewDatabase(path string) (*Database, error) {
 	if path == "" {
-		path = "scholarpower.db"
+		path = "data/scholarpower.db"
 	}
 
 	dbConn, err := sql.Open("sqlite3", path)
