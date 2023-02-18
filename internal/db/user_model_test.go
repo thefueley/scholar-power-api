@@ -11,47 +11,98 @@ import (
 func TestCreateUser(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
-	var username = "test1"
-	var password = "test1"
+	var username = "test111"
+	var password = "test111"
 
 	usr, err := db.CreateUser(context.Background(), username, password)
 	require.NoError(t, err)
 	require.NotEmpty(t, usr)
+
+	usrInfo, err := db.GetUserByName(context.Background(), "test111")
+	require.NoError(t, err)
+
+	err = db.DeleteUser(context.Background(), usrInfo.ID)
+	require.NoError(t, err)
 }
 
 func TestGetUserByID(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	usr, err := db.GetUserByID(context.Background(), "2")
+	var username = "test111"
+	var password = "test111"
+
+	usr, err := db.CreateUser(context.Background(), username, password)
+	require.NoError(t, err)
+
+	usrInfo, err := db.GetUserByName(context.Background(), "test111")
+	require.NoError(t, err)
+
+	usrI, err := db.GetUserByID(context.Background(), usrInfo.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, usr)
-	require.Equal(t, usr.ID, "2")
+	require.Equal(t, usrI.ID, usrInfo.ID)
+
+	err = db.DeleteUser(context.Background(), usrInfo.ID)
+	require.NoError(t, err)
 }
 
 func TestGetUserByName(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	usr, err := db.GetUserByName(context.Background(), "test1")
+	var username = "test111"
+	var password = "test111"
+
+	_, err = db.CreateUser(context.Background(), username, password)
+	require.NoError(t, err)
+
+	usr, err := db.GetUserByName(context.Background(), "test111")
 	require.NoError(t, err)
 	require.NotEmpty(t, usr)
-	require.Equal(t, usr.UserName, "test1")
+	require.Equal(t, usr.UserName, "test111")
+
+	err = db.DeleteUser(context.Background(), usr.ID)
+	require.NoError(t, err)
 }
 
 func TestUpdateUserPassword(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	passwordChangeErr := db.UpdateUserPassword(context.Background(), "test1", "password")
+	var username = "test111"
+	var password = "test111"
+
+	_, err = db.CreateUser(context.Background(), username, password)
+	require.NoError(t, err)
+
+	usr, err := db.GetUserByName(context.Background(), "test111")
+	require.NoError(t, err)
+
+	passwordChangeErr := db.UpdateUserPassword(context.Background(), usr.ID, "password")
 	require.NoError(t, passwordChangeErr)
+
+	err = db.DeleteUser(context.Background(), usr.ID)
+	require.NoError(t, err)
 }
 
 func TestLogin(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	_, err = db.Login(context.Background(), "test1", "test1")
+	var username = "test111"
+	var password = "test111"
+
+	_, err = db.CreateUser(context.Background(), username, password)
+	require.NoError(t, err)
+
+	_, err = db.Login(context.Background(), "test111", "test111")
+	require.NoError(t, err)
+
+	usr, err := db.GetUserByName(context.Background(), "test111")
+	require.NoError(t, err)
+
+	err = db.DeleteUser(context.Background(), usr.ID)
 	require.NoError(t, err)
 }
 

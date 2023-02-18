@@ -21,6 +21,75 @@ Of course, you can always run `go run cmd/server/main.go`
 
 All endpoints that modify the resources will require a valid bearer token.
 
+## Testing
+
+Unit tests have been created.
+
+`make test`
+
+Testing the API manually is accomplished using Postman or with simple `curl` commands.
+
+To ease testing with curl, login with a valid user, then set an env variable with the output of the login command. For example:
+
+`export TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjllMjYwYWYwLTkxNzctNDJlNS05ZDkwLTFiYzI4YjMwYjEzOSIsInVpZCI6IjEiLCJpc3N1ZXIiOiJTY2hvbGFyLVBvd2VyIiwidXNlcm5hbWUiOiJ0ZXN0MSIsImlzc3VlZF9hdCI6IjIwMjMtMDItMThUMDA6NTg6NTkuNDk5OTI1LTA1OjAwIiwiZXhwaXJlZF9hdCI6IjIwMjMtMDItMTlUMDA6NTg6NTkuNDk5OTI1LTA1OjAwIn0.Jh6Fzzn1aXMJ8bH0TwkG4ETNwG88cNetoKKQtG2RG5o`
+
+Create a test user
+`curl -iL -X POST https://test.seismos.io/api/v1/register -H "Content-Type: application/json" -d '{"username": "user1", "password": "user1"}'`
+
+Get user info by userid
+`curl -iL https://test.seismos.io/api/v1/user/{uid} -H "Content-Type: application/json"`
+
+Get user info by username
+`curl -iL https://test.seismos.io/api/v1/user/{username} -H "Content-Type: application/json"`
+
+Update password (JWT required)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/user/{uid} -H "Content-Type: application/json" -d '{"password": "newpassword"}'`
+
+Delete User (JWT required)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X DELETE https://test.seismos.io/api/v1/user/{uid} -H "Content-Type: application/json"`
+
+Login
+`curl -iL -X POST https://test.seismos.io/api/v1/auth -H "Content-Type: application/json" -d '{"username": "user1", "password": "user1"}'`
+
+Get exercise by id
+`curl -iL https://test.seismos.io/api/v1/exercise/1 -H "Content-Type: application/json"`
+
+Get exercise by name
+`curl -iL https://test.seismos.io/api/v1/exercise/name -H "Content-Type: application/json" -d '{"name": "Chest dip"}'`
+
+Get exercises by muscle group
+`curl -iL https://test.seismos.io/api/v1/exercise/lower_back -H "Content-Type: application/json"`
+
+Get exercises by equipment
+`curl -iL https://test.seismos.io/api/v1/exercise/equipment -H "Content-Type: application/json" -d '{"equipment": "barbell"}'`
+
+Create workout plan (JWT required)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X POST https://test.seismos.io/api/v1/workout -H "Content-Type: application/json" -d '{"uid": "1", "name": "Lower #3", "exercises": [ {"sets": "9", "reps": "9", "load": "135", "exercise_id": "89"}, {"sets": "9", "reps": "9", "load": "135", "exercise_id": "77"}]}'`
+
+Get workout plans by user (JWT required) (username is from "Get info by id")
+`curl -iL -H "Authorization: Bearer ${TOKEN}" https://test.seismos.io/api/v1/workout/{username} -H "Content-Type: application/json"`
+
+Get exercises in workout plan (JWT required) (plan_id is from above command)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json"`
+
+Update workout plan (JWT required) (id's in -d must come from above command)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json" -d [{"id": "15","reps": "15","load": "999"},{"id": "16","reps": "14","load": "888"}]`
+
+Delete workout plan (JWT required)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X DELETE https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json"`
+
+Complete workout (JWT required) (plan_id is from "Get workouts by user")
+`curl -iL -X POST https://test.seismos.io/api/v1/history -H "Content-Type: application/json" -d {"date": "3-Feb-2023", "duration": "55:00", "notes": "Gassed", "plan_id": "4f719e89-0d7d-45a6-9fdf-fec7a5351bfd", "athlete_id": "1"}`
+
+Get workout history (JWT required) (uid is from "Get user info by username")
+`curl -iL -H "Authorization: Bearer ${TOKEN}" https://test.seismos.io/api/v1/history/{uid} -H "Content-Type: application/json"`
+
+Update workout history (JWT required) (only updating workout notes implemented)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/history -H "Content-Type: application/json" -d {"notes": "so-so", "plan_id": "4f719e89-0d7d-45a6-9fdf-fec7a5351bfd"}`
+
+Delete workout history (JWT required)
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X DELETE https://test.seismos.io/api/v1/history -H "Content-Type: application/json" -d {"plan_id": "4f719e89-0d7d-45a6-9fdf-fec7a5351bfd"}`
+
 ## API Endpoints
 
 ### User Routes
