@@ -59,9 +59,9 @@ Delete Workout | DELETE /api/v1/workout/{plan_id} | (auth required) | none | Ret
 Action | Method-Endpoint | Params | Required| Response 
 --- | -------| --------------| ------------| ------------
 Create Workout History | POST /api/v1/history | (auth required) | date: string, duration: string, plan_id: string, athlete_id: string <br /> Optional: notes: string | Return: message or error <br /> {<br /> "Message":"History created"<br />}
-Get Workout History | GET /api/v1/history/{id:[0-9]+} | none | (auth required) |Return: message or error <br />[{<br />"ID":"1","Date":"1-Feb-2023","Duration":"55:00","Notes":"Gassed","PlanID":"1","AthleteID":"1"},<br />{"ID":"2","Date":"2-Feb-2023","Duration":"51:00","Notes":"Ok","PlanID":"1","AthleteID":"1"},<br />{"ID":"3","Date":"3-Feb-2023","Duration":"52:00","Notes":"Great","PlanID":"2","AthleteID":"1"},<br />{"ID":"4","Date":"4-Feb-2023","Duration":"50:00","Notes":"Great","PlanID":"2","AthleteID":"1"<br />}]
-Update Workout History | PUT /api/v1/history | (auth required) | athlete_id: string, notes: string <br /> Optional: date: string (not implemented yet), duration: string (not implemented yet) | Return: message or error <br /> {<br />"Message":"workout history updated"<br />}
-Delete Workout History | DELETE /api/v1/history | (auth required) | id: string | Return: message or error <br /> {<br />"Message":"Poof! It's gone."<br />}
+Get Workout History | GET /api/v1/history/{id} | none | (auth required) |Return: message or error <br />[{<br />"ID":"1","Date":"1-Feb-2023","Duration":"55:00","Notes":"Gassed","PlanID":"1","AthleteID":"1"},<br />{"ID":"2","Date":"2-Feb-2023","Duration":"51:00","Notes":"Ok","PlanID":"1","AthleteID":"1"},<br />{"ID":"3","Date":"3-Feb-2023","Duration":"52:00","Notes":"Great","PlanID":"2","AthleteID":"1"},<br />{"ID":"4","Date":"4-Feb-2023","Duration":"50:00","Notes":"Great","PlanID":"2","AthleteID":"1"<br />}]
+Update Workout History | PUT /api/v1/history/{id} | (auth required) | notes: string <br /> Optional: date: string (not implemented yet), duration: string (not implemented yet) | Return: message or error <br /> {<br />"Message":"workout history updated"<br />}
+Delete Workout History | DELETE /api/v1/history/{id} | (auth required) | none | Return: message or error <br /> {<br />"Message":"Poof! It's gone."<br />}
 
 ## References
 
