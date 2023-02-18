@@ -4,7 +4,7 @@ trigger:
 stages:
 - stage: Analyze
   jobs:
-  - job: Build-Info
+  - job: BuildInfo
     displayName: "Buiild Info"
     pool: WorkoutTracker
     workspace:

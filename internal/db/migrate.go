@@ -13,7 +13,7 @@ import (
 func (d *Database) Migrate() error {
 	fmt.Println("Migrating database")
 
-	db, err := sql.Open("sqlite3", "./internal/db/scholarpower.db")
+	db, err := sql.Open("sqlite3", "./internal/db/data/scholarpower.db")
 	if err != nil {
 		fmt.Println("error opening database")
 		return err
