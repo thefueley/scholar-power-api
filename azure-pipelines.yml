@@ -4,6 +4,17 @@ trigger:
 stages:
 - stage: Analyze
   jobs:
+  - job: Build-Info
+    displayName: "Buiild Info"
+    pool: WorkoutTracker
+    workspace:
+      clean: all
+    timeoutInMinutes: "10"
+    steps:
+    - script: |
+        echo "$(Build.SourceVersion)"
+        echo "$(Build.SourceVersionMessage)"
+    continueOnError: 'false'
   - job: SonarCloud
     displayName: "SonarCloud"
     pool: WorkoutTracker
