@@ -45,7 +45,8 @@ func (db *Database) GetWorkoutExercises(ctx context.Context, plan_id string) ([]
 		exercise.name, 
 		exercise.muscle, 
 		exercise.equipment, 
-		exercise.instructions 
+		exercise.instructions, 
+		exercise.id
 		FROM workout 
 		JOIN exercise ON workout.exercise_id = exercise.id 
 		WHERE workout.plan_id = $1;`,
@@ -62,7 +63,7 @@ func (db *Database) GetWorkoutExercises(ctx context.Context, plan_id string) ([]
 
 	for row.Next() {
 		var wo workout.WorkoutRow
-		if err := row.Scan(&wo.ID, &wo.PlanID, &wo.Name, &wo.Sets, &wo.Reps, &wo.Load, &wo.ExerciseName, &wo.ExerciseMuscle, &wo.ExerciseEquipment, &wo.ExerciseInstructions); err != nil {
+		if err := row.Scan(&wo.ID, &wo.PlanID, &wo.Name, &wo.Sets, &wo.Reps, &wo.Load, &wo.ExerciseName, &wo.ExerciseMuscle, &wo.ExerciseEquipment, &wo.ExerciseInstructions, &wo.ExerciseID); err != nil {
 			fmt.Println("model.GetWorkoutByID: Scan: ", err.Error())
 			// log.Fatal(err)
 		}

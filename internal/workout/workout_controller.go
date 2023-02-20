@@ -37,6 +37,7 @@ type WorkoutRow struct {
 	ExerciseMuscle       string
 	ExerciseEquipment    string
 	ExerciseInstructions string
+	ExerciseID           string
 }
 
 type WorkoutShortInfo struct {

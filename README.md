@@ -99,7 +99,7 @@ To ease testing with curl, create a user, instructions below. Login with a valid
 
 #### If request omits an existing exercise, that exercise is dropped from current plan
 
-### Below request assumes exercise id's: 15, 16, 17 exist. Request updates exercise 15, adds a new exercise with a new id, and drop exercises 16 and 17
+#### Below request assumes exercise id's: 15, 16, 17 exist. Request updates exercise 15, adds a new exercise with a new id, and drop exercises 16 and 17
 
 `curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json" -d [{"id": "15","reps": "15","load": "999"},{"reps": "14","load": "888"}]`
 
