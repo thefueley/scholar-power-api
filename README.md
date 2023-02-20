@@ -93,9 +93,15 @@ To ease testing with curl, create a user, instructions below. Login with a valid
 
 ### Update workout plan (JWT required)  
 
-#### Only id is required. All other params optional. id's in -d must come from above command
+#### Send full details of a workout: uid: string, name: string, exercises: {id: string, sets: string, reps: string, load: string, exercise_id: string}
 
-`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json" -d [{"id": "15","reps": "15","load": "999"},{"id": "16","reps": "14","load": "888"}]`
+#### If a new exercise is added, no id is required in the exercises element. The exercise_id is still required
+
+#### If request omits an existing exercise, that exercise is dropped from current plan
+
+### Below request assumes exercise id's: 15, 16, 17 exist. Request updates exercise 15, adds a new exercise with a new id, and drop exercises 16 and 17
+
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/workout/{plan_id} -H "Content-Type: application/json" -d [{"id": "15","reps": "15","load": "999"},{"reps": "14","load": "888"}]`
 
 ### Delete workout plan (JWT required)
 
@@ -160,7 +166,7 @@ Delete Workout|**DELETE** /api/v1/workout/{plan_id}|none|none|`{"Message": "Poof
 Action|Method-Endpoint|Required|Optionl|Response|Notes
 -|-|-|-|-|-
 Create Workout History|**POST** /api/v1/history|date: string, duration: string, plan_id: string, athlete_id: string|notes: string|`{"Message":"History created"}`|JWT Required
-Get Workout History|**GET** /api/v1/history/{id} |none|none|`[{<br />"ID":"1","Date":"1-Feb-2023","Duration":"55:00","Notes":"Gassed","PlanID":"1","AthleteID":"1"},{"ID":"2","Date":"2-Feb-2023","Duration":"51:00","Notes":"Ok","PlanID":"1","AthleteID":"1"},{"ID":"3","Date":"3-Feb-2023","Duration":"52:00","Notes":"Great","PlanID":"2","AthleteID":"1"},{"ID":"4","Date":"4-Feb-2023","Duration":"50:00","Notes":"Great","PlanID":"2","AthleteID":"1"}]`|JWT Required
+Get Workout History|**GET** /api/v1/history/{id} |none|none|`[{"ID":"1","Date":"1-Feb-2023","Duration":"55:00","Notes":"Gassed","PlanID":"1","AthleteID":"1"},{"ID":"2","Date":"2-Feb-2023","Duration":"51:00","Notes":"Ok","PlanID":"1","AthleteID":"1"},{"ID":"3","Date":"3-Feb-2023","Duration":"52:00","Notes":"Great","PlanID":"2","AthleteID":"1"},{"ID":"4","Date":"4-Feb-2023","Duration":"50:00","Notes":"Great","PlanID":"2","AthleteID":"1"}]`|JWT Required
 Update Workout History|**PUT** /api/v1/history/{id}|notes:string|date: string (not implemented), duration: string (not implemented) |`{"Message":"workout history updated"}`|JWT Required
 Delete Workout History|**DELETE** /api/v1/history/{id}|none|none|`{"Message":"Poof! It's gone."}`|JWT Required
 

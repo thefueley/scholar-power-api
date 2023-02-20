@@ -87,7 +87,7 @@ func (ws *WorkoutService) GetWorkoutExercises(ctx context.Context, plan_id strin
 func (ws *WorkoutService) GetWorkoutDetails(ctx context.Context, plan_id string) ([]Workout, error) {
 	wo, err := ws.Store.GetWorkoutDetails(ctx, plan_id)
 	if err != nil {
-		fmt.Println("controller.GetWorkoutDetails: ", err)
+		fmt.Printf("controller.GetWorkoutDetails: %v\n", err)
 		return []Workout{}, ErrWorkoutNotFound
 	}
 	return wo, nil
