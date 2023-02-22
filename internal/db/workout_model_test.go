@@ -37,6 +37,7 @@ func TestGetWorkoutExercises(t *testing.T) {
 
 	// create a workout
 	testWorkout := workout.Workout{
+		PlanID:         "999999",
 		Name:           "999999",
 		Sets:           "999999",
 		Reps:           "999999",

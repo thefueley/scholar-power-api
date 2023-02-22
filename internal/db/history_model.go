@@ -84,7 +84,6 @@ func (db *Database) GetHistory(ctx context.Context, uid string) ([]history.Histo
 }
 
 func (db *Database) UpdateHistory(ctx context.Context, hist history.History) error {
-	fmt.Printf("got athlete id: %s\n", hist.AthleteID)
 	allCurrentHistory, err := db.GetHistory(ctx, hist.AthleteID)
 
 	if err != nil {
