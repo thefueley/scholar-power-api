@@ -40,9 +40,9 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		createUserRow.PasswordHash,
 	)
 
-	newuserid := d.QueryRowContext(ctx, `SELECT id FROM user WHERE username = $1`, username)
-	var uid string
-	newuserid.Scan(&uid)
+	newusername := d.QueryRowContext(ctx, `SELECT username FROM user WHERE username = $1`, username)
+	var uname string
+	newusername.Scan(&uname)
 
 	if err != nil {
 		return "", fmt.Errorf("create user: %w", err)
@@ -52,17 +52,17 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return uid, nil
+	return uname, nil
 }
 
 func (d *Database) GetUserByID(ctx context.Context, id string) (swoleuser.User, error) {
 	var userRow UserRow
-	row := d.QueryRowContext(ctx, `SELECT * 
+	row := d.QueryRowContext(ctx, `SELECT id, username 
 	FROM user
 	WHERE id = $1`,
 		id,
 	)
-	err := row.Scan(&userRow.ID, &userRow.UserName, &userRow.PasswordHash)
+	err := row.Scan(&userRow.ID, &userRow.UserName)
 
 	if err != nil {
 		return swoleuser.User{}, fmt.Errorf("could not get user: %w", err)
@@ -73,10 +73,10 @@ func (d *Database) GetUserByID(ctx context.Context, id string) (swoleuser.User, 
 func (d *Database) GetUserByName(ctx context.Context, username string) (swoleuser.User, error) {
 	var userRow UserRow
 	row := d.QueryRowContext(ctx,
-		`SELECT id, username, password_hash 
+		`SELECT id, username 
 		FROM user 
 		WHERE username = $1`, username)
-	err := row.Scan(&userRow.ID, &userRow.UserName, &userRow.PasswordHash)
+	err := row.Scan(&userRow.ID, &userRow.UserName)
 
 	if err != nil {
 		return swoleuser.User{}, fmt.Errorf("could not get user: %w", err)
