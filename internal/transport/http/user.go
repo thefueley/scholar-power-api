@@ -53,13 +53,13 @@ func (h *SwoleHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	convertedUser := createUserRequestToUser(user)
 
-	createdUser, err := h.UService.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
+	newUser, err := h.UService.CreateUser(r.Context(), convertedUser.UserName, convertedUser.PasswordHash)
 	if err != nil {
 		http.Error(w, "user already exists", http.StatusForbidden)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(createdUser); err != nil {
+	if err := json.NewEncoder(w).Encode(newUser); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,9 @@ func (h *SwoleHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(usr); err != nil {
+	username := usr.UserName
+
+	if err := json.NewEncoder(w).Encode(username); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -99,7 +101,9 @@ func (h *SwoleHandler) GetUserByName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(usr); err != nil {
+	uid := usr.ID
+
+	if err := json.NewEncoder(w).Encode(uid); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -133,7 +137,7 @@ func (h *SwoleHandler) UpdateUserPassword(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	if err := json.NewEncoder(w).Encode(newPassword); err != nil {
+	if err := json.NewEncoder(w).Encode("password updated"); err != nil {
 		fmt.Printf("view.UpdateUserPassword NewEncoder: %v\n", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
