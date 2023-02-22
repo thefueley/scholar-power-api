@@ -123,11 +123,11 @@ To ease testing with curl, create a user, instructions below. Login with a valid
 
 #### only updating workout **notes** implemented
 
-`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/history -H "Content-Type: application/json" -d {"notes": "so-so", "plan_id": "4f719e89-0d7d-45a6-9fdf-fec7a5351bfd"}`
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X PUT https://test.seismos.io/api/v1/history/{id} -H "Content-Type: application/json" -d {"notes": "so-so", "athlete_id": "1}`
 
 ### Delete workout history (JWT required)
 
-`curl -iL -H "Authorization: Bearer ${TOKEN}" -X DELETE https://test.seismos.io/api/v1/history -H "Content-Type: application/json" -d {"plan_id": "4f719e89-0d7d-45a6-9fdf-fec7a5351bfd"}`
+`curl -iL -H "Authorization: Bearer ${TOKEN}" -X DELETE https://test.seismos.io/api/v1/history/{id} -H "Content-Type: application/json" -d {"athlete_id": "1"}`
 
 ## API Endpoints
 

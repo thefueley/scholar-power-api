@@ -73,9 +73,9 @@ func (h *SwoleHandler) mapRoutes() {
 
 	// History routes
 	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.CreateHistory)).Methods(http.MethodPost, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.GetHistory)).Methods(http.MethodGet, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.UpdateHistory)).Methods(http.MethodPut, http.MethodOptions)
-	h.Router.HandleFunc("/api/v1/history", JWTAuth(h.DeleteHistory)).Methods(http.MethodDelete, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history/{uid:[0-9]+}", JWTAuth(h.GetHistory)).Methods(http.MethodGet, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.UpdateHistory)).Methods(http.MethodPut, http.MethodOptions)
+	h.Router.HandleFunc("/api/v1/history/{id:[0-9]+}", JWTAuth(h.DeleteHistory)).Methods(http.MethodDelete, http.MethodOptions)
 
 }
 

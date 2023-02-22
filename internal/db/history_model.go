@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -19,7 +20,7 @@ type HistoryRow struct {
 }
 
 func (db *Database) CreateHistory(ctx context.Context, hist history.History) error {
-	_, err := db.ExecContext(ctx,
+	result, err := db.ExecContext(ctx,
 		`INSERT INTO history(
 			date, 
 			duration, 
@@ -31,21 +32,31 @@ func (db *Database) CreateHistory(ctx context.Context, hist history.History) err
 	)
 
 	if err != nil {
-		return fmt.Errorf("could not create exercise: %w", err)
+		fmt.Printf("model.CreateHistory: ExecContext: %v\n", err)
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("model.CreateHistory: RowsAffected: %v\n", err)
+	}
+
+	if rows != 1 {
+		return errors.New("could not create workout history")
+	}
+
 	return nil
 }
 
-func (db *Database) GetHistory(ctx context.Context, id string) ([]history.History, error) {
+func (db *Database) GetHistory(ctx context.Context, uid string) ([]history.History, error) {
 	row, err := db.QueryContext(ctx,
 		`SELECT *
 		FROM history
 		WHERE athlete_id = $1`,
-		id,
+		uid,
 	)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("model.GetHistory: QueryContext: %v\n", err)
 	}
 
 	defer row.Close()
@@ -65,11 +76,21 @@ func (db *Database) GetHistory(ctx context.Context, id string) ([]history.Histor
 		return []history.History{}, fmt.Errorf("could not get workout history: %w", err)
 	}
 
+	if len(foundHistory) == 0 {
+		return []history.History{}, history.ErrHistoryNotFound
+	}
+
 	return foundHistory, nil
 }
 
 func (db *Database) UpdateHistory(ctx context.Context, hist history.History) error {
+	fmt.Printf("got athlete id: %s\n", hist.AthleteID)
 	allCurrentHistory, err := db.GetHistory(ctx, hist.AthleteID)
+
+	if err != nil {
+		return fmt.Errorf("model.UpdateHistory: could not get current workout history")
+	}
+
 	var currentHistory history.History
 	for _, h := range allCurrentHistory {
 		if h.ID == hist.ID {
@@ -79,11 +100,7 @@ func (db *Database) UpdateHistory(ctx context.Context, hist history.History) err
 
 	finalHistory := reconcileHistory(currentHistory, hist)
 
-	if err != nil {
-		return fmt.Errorf("model.UpdateHistory: GetHistoryByUserID: %w", err)
-	}
-
-	_, err = db.ExecContext(ctx,
+	result, err := db.ExecContext(ctx,
 		`UPDATE history 
 		SET notes = $1 
 		WHERE id = $2`,
@@ -91,22 +108,42 @@ func (db *Database) UpdateHistory(ctx context.Context, hist history.History) err
 	)
 
 	if err != nil {
-		return fmt.Errorf("could not update workout history: %w", err)
+		fmt.Printf("model.UpdateHistory: ExecContext: %v\n", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("model.UpdateHistory: RowsAffected: %v\n", err)
+	}
+
+	if rows != 1 {
+		return errors.New("could not update workout history")
 	}
 
 	return nil
 }
 
 func (db *Database) DeleteHistory(ctx context.Context, id string) error {
-	_, err := db.ExecContext(ctx,
+
+	result, err := db.ExecContext(ctx,
 		`DELETE FROM history
 		WHERE id = $1`,
 		id,
 	)
 
 	if err != nil {
-		return fmt.Errorf("could not delete workout history: %w", err)
+		fmt.Printf("model.DeleteHistory: ExecContext: %v\n", err)
 	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("model.DeleteHistory: RowsAffected: %v\n", err)
+	}
+
+	if rows != 1 {
+		return errors.New("could not delete workout history")
+	}
+
 	return nil
 }
 
