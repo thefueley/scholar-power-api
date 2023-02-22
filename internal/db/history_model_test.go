@@ -14,16 +14,21 @@ func TestCreateHistory(t *testing.T) {
 	require.NoError(t, err)
 
 	hist := history.History{
-		ID:        "1",
-		Date:      "2021-01-01",
-		Duration:  "1 hour",
-		Notes:     "notes",
-		PlanID:    "1",
-		AthleteID: "1",
+		Date:      "01-01-2000",
+		Duration:  "99:00:00",
+		Notes:     "999999",
+		PlanID:    "999999",
+		AthleteID: "999999",
 	}
 
 	err = db.CreateHistory(context.Background(), hist)
+	require.NoError(t, err)
 
+	wh, err := db.GetHistory(context.Background(), "999999")
+	require.NoError(t, err)
+	require.NotEmpty(t, wh)
+
+	err = db.DeleteHistory(context.Background(), wh[0].ID)
 	require.NoError(t, err)
 }
 
@@ -31,39 +36,72 @@ func TestGetHistory(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	exr, err := db.GetExerciseByID(context.Background(), "1")
+	hist := history.History{
+		Date:      "01-01-2000",
+		Duration:  "99:00:00",
+		Notes:     "999999",
+		PlanID:    "999999",
+		AthleteID: "999999",
+	}
+
+	err = db.CreateHistory(context.Background(), hist)
 	require.NoError(t, err)
 
-	require.NotEmpty(t, exr)
+	workouts, err := db.GetHistory(context.Background(), "999999")
+	require.NoError(t, err)
+	require.NotEmpty(t, workouts)
 
-	require.NotZero(t, exr.ID)
-	require.Equal(t, exr.ID, "1")
+	require.Equal(t, workouts[0].PlanID, "999999")
+
+	err = db.DeleteHistory(context.Background(), workouts[0].ID)
+	require.NoError(t, err)
 }
 
 func TestUpdateHistory(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	exr, err := db.GetExerciseByMuscle(context.Background(), "chest")
-	require.NoError(t, err)
-	require.NotEmpty(t, exr)
-	for _, v := range exr {
-		if v.Name == "chest" {
-			require.Equal(t, v.Name, "chest")
-		}
+	hist := history.History{
+		Date:      "01-01-2000",
+		Duration:  "99:00:00",
+		Notes:     "999999",
+		PlanID:    "999999",
+		AthleteID: "999999",
 	}
+
+	err = db.CreateHistory(context.Background(), hist)
+	require.NoError(t, err)
+
+	wh, err := db.GetHistory(context.Background(), "999999")
+	require.NoError(t, err)
+	require.NotEmpty(t, wh)
+
+	err = db.UpdateHistory(context.Background(), history.History{ID: wh[0].ID, Notes: "🙃", AthleteID: "999999"})
+	require.NoError(t, err)
+
+	err = db.DeleteHistory(context.Background(), wh[0].ID)
+	require.NoError(t, err)
 }
 
 func TestDeleteHistory(t *testing.T) {
 	db, err := NewDatabase("")
 	require.NoError(t, err)
 
-	exr, err := db.GetExerciseByEquipment(context.Background(), "barbell")
-	require.NoError(t, err)
-	require.NotEmpty(t, exr)
-	for _, v := range exr {
-		if v.Name == "barbell" {
-			require.Equal(t, v.Equipment, "barbell")
-		}
+	hist := history.History{
+		Date:      "01-01-2000",
+		Duration:  "99:00:00",
+		Notes:     "999999",
+		PlanID:    "999999",
+		AthleteID: "999999",
 	}
+
+	err = db.CreateHistory(context.Background(), hist)
+	require.NoError(t, err)
+
+	wh, err := db.GetHistory(context.Background(), "999999")
+	require.NoError(t, err)
+	require.NotEmpty(t, wh)
+
+	err = db.DeleteHistory(context.Background(), wh[0].ID)
+	require.NoError(t, err)
 }
