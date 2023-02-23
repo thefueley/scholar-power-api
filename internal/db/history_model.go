@@ -72,12 +72,8 @@ func (db *Database) GetHistory(ctx context.Context, uid string) ([]history.Histo
 		foundHistory = append(foundHistory, hist)
 	}
 
-	if err != nil {
-		return []history.History{}, fmt.Errorf("could not get workout history: %w", err)
-	}
-
 	if len(foundHistory) == 0 {
-		return []history.History{}, history.ErrHistoryNotFound
+		return []history.History{}, nil
 	}
 
 	return foundHistory, nil
