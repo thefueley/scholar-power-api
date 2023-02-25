@@ -32,7 +32,7 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		PasswordHash: sql.NullString{String: passwordHash, Valid: true},
 	}
 
-	insertRow, err := d.ExecContext(ctx,
+	result, err := d.ExecContext(ctx,
 		`INSERT INTO user (username, password_hash) 
 		VALUES 
 		($1, $2) RETURNING id`,
@@ -40,19 +40,19 @@ func (d *Database) CreateUser(ctx context.Context, username, password string) (s
 		createUserRow.PasswordHash,
 	)
 
-	newusername := d.QueryRowContext(ctx, `SELECT username FROM user WHERE username = $1`, username)
-	var uname string
-	newusername.Scan(&uname)
-
 	if err != nil {
 		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	if insertRow == nil {
+	if result == nil {
 		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return uname, nil
+	newuserid := d.QueryRowContext(ctx, `SELECT id FROM user WHERE username = $1`, username)
+	var uid string
+	newuserid.Scan(&uid)
+
+	return uid, nil
 }
 
 func (d *Database) GetUserByID(ctx context.Context, id string) (swoleuser.User, error) {

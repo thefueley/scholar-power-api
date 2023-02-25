@@ -41,15 +41,32 @@ func NewUserService(store UserStore) *UserService {
 }
 
 func (us *UserService) CreateUser(ctx context.Context, username, password string) (string, error) {
-	username, err := us.Store.CreateUser(ctx, username, password)
+	uid, err := us.Store.CreateUser(ctx, username, password)
 	if err != nil {
 		fmt.Printf("error creating user '%v' or user already exists\n", username)
 		return "", err
 	}
 
+	maker, err := token.NewJWTMaker(os.Getenv("SCHOLAR_POWER_API_SIGNING_KEY"))
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
+
+	duration := 24 * time.Hour
+
+	token, _, err := maker.CreateToken(uid, username, duration)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
+
+	_, err = maker.VerifyToken(token)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+	}
+
 	fmt.Printf("Created user: %v\n", username)
 
-	return "user " + username + " created", nil
+	return token, nil
 }
 
 func (us *UserService) GetUserByID(ctx context.Context, id string) (User, error) {
