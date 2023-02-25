@@ -145,7 +145,7 @@ To ease testing with curl, create a user, instructions below. Login with a valid
 
 Action|Method-Endpoint|Required|Optional|Response|Notes  
 -|--|-|-|-|-
-Create User|**POST** /api/v1/register|username: string, password: string|none|message|none
+Create User|**POST** /api/v1/register|username: string, password: string|none|token|none
 Get User By ID|**GET** /api/v1/user/{id}|none|none|username|none
 Get User By Username|**GET** /api/v1/user/{username}|none|none|uid|none
 Update User Password|**PUT** /api/v1/user/{id}|password: string|none|message|none
