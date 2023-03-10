@@ -5,6 +5,10 @@ Backend API for [Scholar Power](https://github.com/MoistCode/scholar-power) work
 
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=thefueley_scholar-power-api&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=thefueley_scholar-power-api)
 
+## ARCHIVE
+
+Archiving repo as the course is now complete.
+
 ## Purpose
 
 Workout Tracker is an application to help people keep track of their workouts.
